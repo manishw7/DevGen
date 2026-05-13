@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: devgen-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount fine-tuned model checkpoint if it exists
+      - ./trocr-devanagari-lora:/app/trocr-devanagari-lora:ro
+    environment:
+      - HF_HOME=/tmp/huggingface
+      - DEVGEN_PROJECT_ROOT=/app
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: devgen-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  default:
+    name: devgen-network

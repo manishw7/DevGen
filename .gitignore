@@ -1,0 +1,96 @@
+# macOS / editor noise
+.DS_Store
+._*
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+.claude/
+
+# Environment files
+.env
+.env.*
+frontend/.env
+frontend/.env.*
+!.env.example
+!frontend/.env.example
+
+# Python environments and caches
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+*.so
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Node / Vite frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.vite-temp/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local package/cache folders
+.npm-cache/
+.cache/
+.huggingface/
+hf_cache/
+
+# Dataset exports and local training data
+data/
+benchmark/
+
+# GAN outputs and synthetic datasets
+gan_outputs/
+gan_v2_outputs/
+generated_dataset/
+synthetic_dataset/
+pro_synthetic_dataset/
+smoke_test/
+smoke_test_pro/
+v2_samples/
+v2_dataset/
+pro_samples/
+
+# Model checkpoints and ML artifacts
+trocr-devanagari-lora/
+trocr-devanagari-lora-smoke/
+checkpoints/
+models/
+runs/
+wandb/
+*.pt
+*.pth
+*.bin
+*.ckpt
+*.safetensors
+*.onnx
+
+# Logs and runtime output
+*.log
+logs/
+tmp/
+temp/
+
+# Docker/local overrides
+docker-compose.override.yml

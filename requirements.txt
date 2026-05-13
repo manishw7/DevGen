@@ -1,0 +1,33 @@
+# DevGen Framework — Python Dependencies
+# Activate venv first: .\venv\Scripts\activate
+# Then install: pip install -r requirements.txt
+
+# ── API Server ──────────────────────────────────────
+fastapi
+uvicorn[standard]
+python-multipart
+
+# ── Image Processing ────────────────────────────────
+Pillow
+numpy
+opencv-python-headless
+
+# ── Data / Dataset ──────────────────────────────────
+pandas
+pyarrow
+datasets
+editdistance
+
+# ── ML / TrOCR ──────────────────────────────────────
+# For CPU-only: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+# For CUDA GPU: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+torch
+torchvision
+transformers
+accelerate
+peft
+
+# ── Benchmarking (optional) ─────────────────────────
+# Requires Tesseract binary installed separately:
+# https://github.com/UB-Mannheim/tesseract/wiki
+pytesseract
