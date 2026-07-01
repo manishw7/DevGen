@@ -57,6 +57,8 @@ interface RecognitionResult {
     adapter_path: string | null;
     using_adapter: boolean;
     device: string;
+    model_used: string;
+    force_model_received: string | null;
   };
 }
 
@@ -82,6 +84,7 @@ export default function Recognize() {
   const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
   const [modelError, setModelError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [routingMode, setRoutingMode] = useState<string>("Automatic");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -129,9 +132,10 @@ export default function Recognize() {
     setError(null);
 
     try {
+      const forceModel = routingMode === "Automatic" ? undefined : (routingMode === "Word" ? "trocr" : "cnn");
       const response = includeExtraction
-        ? await recognizeFull(file)
-        : await recognizeDocument(file);
+        ? await recognizeFull(file, forceModel)
+        : await recognizeDocument(file, forceModel);
       setResult(response);
       await loadModelInfo();
     } catch (err: any) {
@@ -314,15 +318,23 @@ export default function Recognize() {
               <Scan size={20} />
               {file?.name}
             </div>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-              <button className="btn btn-secondary" onClick={clearSelection}>
-                Clear
-              </button>
+              <div className="custom-select-wrapper">
+                <select 
+                  className="btn btn-secondary" 
+                  value={routingMode} 
+                  onChange={(e) => setRoutingMode(e.target.value)}
+                  disabled={loading}
+                  style={{ minWidth: "140px", cursor: "pointer" }}
+                >
+                  <option value="Automatic">Automatic Mode</option>
+                  <option value="Word">Word (TrOCR)</option>
+                  <option value="Character">Character (CNN)</option>
+                </select>
+              </div>
               <button className="btn btn-primary" onClick={runRecognition} disabled={loading}>
                 {loading ? "Running OCR..." : includeExtraction ? "Run OCR + NER" : "Run OCR"}
               </button>
             </div>
-          </div>
 
           <div className="tabs" style={{ marginBottom: "16px" }}>
             <button
@@ -408,7 +420,14 @@ export default function Recognize() {
               <div className="stat-value" style={{ fontSize: "18px" }}>
                 {result.inference_ms ? `${result.inference_ms.toFixed(0)} ms` : "—"}
               </div>
-              <div className="stat-label">Inference Time</div>
+              <div className="stat-label">
+                Inference ({result.model_info.model_used === "cnn_classifier" ? "CNN" : "TrOCR"})
+                {result.model_info.force_model_received && (
+                  <span style={{ opacity: 0.5, fontSize: "10px", marginLeft: "4px" }}>
+                    [Forced: {result.model_info.force_model_received}]
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="stat-card">
@@ -424,7 +443,36 @@ export default function Recognize() {
             </div>
           </div>
 
-          <div className="result-container">
+          <div className="result-container" style={{ gridTemplateColumns: "1fr 1fr 1fr", gap: "24px" }}>
+            <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+              <div className="card-title" style={{ marginBottom: "20px" }}>Overall Confidence</div>
+              {result.average_confidence !== null && (
+                <div style={{ position: "relative", width: "120px", height: "120px" }}>
+                  <svg width="120" height="120" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+                    <circle 
+                      cx="50" cy="50" r="45" fill="none" 
+                      stroke={getConfidenceColor(result.average_confidence)} 
+                      strokeWidth="8" 
+                      strokeDasharray="282.7" 
+                      strokeDashoffset={282.7 * (1 - result.average_confidence)} 
+                      strokeLinecap="round" 
+                      style={{ transition: "stroke-dashoffset 0.8s ease-out" }}
+                    />
+                    <text x="50" y="58" fontFamily="Arial" fontSize="22" fontWeight="bold" fill={getConfidenceColor(result.average_confidence)} textAnchor="middle">
+                      {Math.round(result.average_confidence * 100)}%
+                    </text>
+                  </svg>
+                </div>
+              )}
+              <div 
+                className={`badge ${result.average_confidence! > 0.9 ? "success" : result.average_confidence! > 0.7 ? "info" : "error"}`}
+                style={{ marginTop: "16px", padding: "6px 12px", fontSize: "14px" }}
+              >
+                {result.average_confidence! > 0.9 ? "Highly Confident" : result.average_confidence! > 0.7 ? "Likely Correct" : "Manual Review Needed"}
+              </div>
+            </div>
+
             <div className="card">
               <div className="card-header card-header-wrap">
                 <div className="card-title">

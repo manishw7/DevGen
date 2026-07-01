@@ -133,12 +133,14 @@ def crop_to_foreground(img: np.ndarray, padding_ratio: float = 0.18) -> np.ndarr
 
 def preprocess_for_ocr(image_bytes: bytes) -> Image.Image:
     """Prepare a word image for TrOCR.
-    Uses adaptive preprocessing based on the raw aspect ratio:
-    - Long words (AR > 2.2) like 'khanekura' are cropped and padded to square.
-    - Medium words (1.55 < AR <= 2.2) like 'nepal' and 'manish' are kept raw.
-    - Short words/blocks (AR <= 1.55) are just cropped to foreground.
+    Matches HF Space Logic:
+    - AR <= 1.55: Crop to foreground.
+    - AR > 2.2: Crop to foreground + Pad to Square.
+    - 1.55 < AR <= 2.2: No change (raw).
     """
     img = bytes_to_cv2(image_bytes)
+    if img is None: return None
+    
     h, w = img.shape[:2]
     aspect_ratio = w / float(h)
     
@@ -146,7 +148,10 @@ def preprocess_for_ocr(image_bytes: bytes) -> Image.Image:
         img = crop_to_foreground(img)
     elif aspect_ratio > 2.2:
         img = crop_to_foreground(img)
-        img = normalize_for_model(img)
+        img = normalize_for_model(img, target_height=384, target_width=384)
+    else:
+        # Standard word - return raw as HF space does
+        pass
         
     return cv2_to_pil(img)
 

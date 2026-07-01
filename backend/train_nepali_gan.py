@@ -1,213 +1,117 @@
 """
-DevGen Framework — GAN Training Script (v3)
-Generates synthetic Devanagari handwritten character/word images.
-
-Architecture: ResNet GAN with DiffAugment, Hinge Loss, Spectral Normalization,
-              and Exponential Moving Average (EMA) for high-quality generation.
-
-Inspired by Chhatkuli et al. (2021) and enhanced with modern GAN techniques
-from BigGAN (Brock et al. 2019) and DiffAugment (Zhao et al. 2020).
-
-Usage (local):
-    python -m backend.train_nepali_gan \\
-        --data-dir data/Images/Images \\
-        --steps 100000 --batch-size 64
-
-Usage (Kaggle): See DevGen_GAN_Notebook.ipynb
+DevGen Framework — Rectangular Word GAN (128x64)
+Features: ResNet+SN, EMA, Hinge Loss, Checkpoint Resumption
+Designed specifically for training on words (INDIC dataset) in Kaggle.
 """
 
 import argparse
 import copy
 import os
+import time
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets, transforms
 from torchvision.utils import save_image
 from tqdm import tqdm
 
-# ── Hyperparameters ─────────────────────────────────────────────────────────
 LATENT_DIM = 128
-IMG_SIZE = 64
+IMG_H = 64
+IMG_W = 128
 CHANNELS = 1
-G_CH = 64  # Base channel multiplier for Generator
-D_CH = 64  # Base channel multiplier for Discriminator
 
+# ── DiffAugment (Safe for Handwriting) ─────────────────────────────────────
+# We only use translation. Cutout and Color destroy character strokes.
 
-# ── DiffAugment (Zhao et al. 2020) ─────────────────────────────────────────
-
-def DiffAugment(x, policy="color,translation,cutout"):
-    """Apply differentiable augmentations to stabilize GAN training."""
+def DiffAugment(x, policy="translation"):
     if not policy:
         return x
-    for p in policy.split(","):
-        for fn in _AUGMENT_FNS[p]:
-            x = fn(x)
+    if "translation" in policy:
+        ratio = 0.125
+        sx = int(x.size(2) * ratio + 0.5)
+        sy = int(x.size(3) * ratio + 0.5)
+        tx = torch.randint(-sx, sx + 1, size=[x.size(0), 1, 1], device=x.device)
+        ty = torch.randint(-sy, sy + 1, size=[x.size(0), 1, 1], device=x.device)
+        gb, gx, gy = torch.meshgrid(
+            torch.arange(x.size(0), device=x.device),
+            torch.arange(x.size(2), device=x.device),
+            torch.arange(x.size(3), device=x.device), indexing="ij",
+        )
+        gx = torch.clamp(gx + tx + 1, 0, x.size(2) + 1)
+        gy = torch.clamp(gy + ty + 1, 0, x.size(3) + 1)
+        xp = F.pad(x, [1, 1, 1, 1])
+        x = xp.permute(0, 2, 3, 1).contiguous()[gb, gx, gy].permute(0, 3, 1, 2)
     return x.contiguous()
 
 
-def _rand_brightness(x):
-    return x + (torch.rand(x.size(0), 1, 1, 1, dtype=x.dtype, device=x.device) - 0.5)
+# ── Architecture ───────────────────────────────────────────────────────────
 
-
-def _rand_saturation(x):
-    mean = x.mean(dim=1, keepdim=True)
-    return (x - mean) * (torch.rand(x.size(0), 1, 1, 1, dtype=x.dtype, device=x.device) * 2) + mean
-
-
-def _rand_contrast(x):
-    mean = x.mean(dim=[1, 2, 3], keepdim=True)
-    return (x - mean) * (torch.rand(x.size(0), 1, 1, 1, dtype=x.dtype, device=x.device) * 0.5 + 0.5) + mean
-
-
-def _rand_translation(x, ratio=0.125):
-    sx = int(x.size(2) * ratio + 0.5)
-    sy = int(x.size(3) * ratio + 0.5)
-    tx = torch.randint(-sx, sx + 1, size=[x.size(0), 1, 1], device=x.device)
-    ty = torch.randint(-sy, sy + 1, size=[x.size(0), 1, 1], device=x.device)
-    gb, gx, gy = torch.meshgrid(
-        torch.arange(x.size(0), device=x.device),
-        torch.arange(x.size(2), device=x.device),
-        torch.arange(x.size(3), device=x.device), indexing="ij",
-    )
-    gx = torch.clamp(gx + tx + 1, 0, x.size(2) + 1)
-    gy = torch.clamp(gy + ty + 1, 0, x.size(3) + 1)
-    xp = F.pad(x, [1, 1, 1, 1])
-    return xp.permute(0, 2, 3, 1).contiguous()[gb, gx, gy].permute(0, 3, 1, 2)
-
-
-def _rand_cutout(x, ratio=0.5):
-    cs = int(x.size(2) * ratio + 0.5), int(x.size(3) * ratio + 0.5)
-    ox = torch.randint(0, x.size(2) + (1 - cs[0] % 2), size=[x.size(0), 1, 1], device=x.device)
-    oy = torch.randint(0, x.size(3) + (1 - cs[1] % 2), size=[x.size(0), 1, 1], device=x.device)
-    gb, gx, gy = torch.meshgrid(
-        torch.arange(x.size(0), device=x.device),
-        torch.arange(cs[0], device=x.device),
-        torch.arange(cs[1], device=x.device), indexing="ij",
-    )
-    gx = torch.clamp(gx + ox - cs[0] // 2, 0, x.size(2) - 1)
-    gy = torch.clamp(gy + oy - cs[1] // 2, 0, x.size(3) - 1)
-    mask = torch.ones(x.size(0), x.size(2), x.size(3), dtype=x.dtype, device=x.device)
-    mask[gb, gx, gy] = 0
-    return x * mask.unsqueeze(1)
-
-
-_AUGMENT_FNS = {
-    "color": [_rand_brightness, _rand_saturation, _rand_contrast],
-    "translation": [_rand_translation],
-    "cutout": [_rand_cutout],
-}
-
-
-# ── Model Architecture ─────────────────────────────────────────────────────
-
-class ResBlockUp(nn.Module):
-    """Generator residual block with bilinear upsampling."""
-
-    def __init__(self, in_ch, out_ch):
+class ResBlock(nn.Module):
+    """Residual block with spectral normalization."""
+    def __init__(self, ic, oc, stride=1):
         super().__init__()
-        self.bn1 = nn.BatchNorm2d(in_ch)
-        self.conv1 = nn.Conv2d(in_ch, out_ch, 3, 1, 1)
-        self.bn2 = nn.BatchNorm2d(out_ch)
-        self.conv2 = nn.Conv2d(out_ch, out_ch, 3, 1, 1)
-        self.shortcut = nn.Conv2d(in_ch, out_ch, 1) if in_ch != out_ch else nn.Identity()
+        self.conv1 = nn.utils.spectral_norm(nn.Conv2d(ic, oc, 3, stride, 1))
+        self.conv2 = nn.utils.spectral_norm(nn.Conv2d(oc, oc, 3, 1, 1))
+        self.relu = nn.LeakyReLU(0.2, inplace=True)
+        self.sc = nn.Sequential() if stride == 1 and ic == oc else nn.Sequential(
+            nn.utils.spectral_norm(nn.Conv2d(ic, oc, 1, stride, 0))
+        )
 
     def forward(self, x):
-        h = F.relu(self.bn1(x))
-        h = F.interpolate(h, scale_factor=2, mode="bilinear", align_corners=False)
-        h = self.conv1(h)
-        h = self.conv2(F.relu(self.bn2(h)))
-        sc = F.interpolate(x, scale_factor=2, mode="bilinear", align_corners=False)
-        return h + self.shortcut(sc)
-
-
-class ResBlockDown(nn.Module):
-    """Discriminator residual block with average-pool downsampling."""
-
-    def __init__(self, in_ch, out_ch, first_block=False):
-        super().__init__()
-        self.first_block = first_block
-        self.conv1 = nn.utils.spectral_norm(nn.Conv2d(in_ch, out_ch, 3, 1, 1))
-        self.conv2 = nn.utils.spectral_norm(nn.Conv2d(out_ch, out_ch, 3, 1, 1))
-        self.shortcut = nn.utils.spectral_norm(nn.Conv2d(in_ch, out_ch, 1)) if in_ch != out_ch else nn.Identity()
-
-    def forward(self, x):
-        h = x if self.first_block else F.relu(x)
-        h = F.relu(self.conv1(h))
-        h = self.conv2(h)
-        sc = self.shortcut(x)
-        return F.avg_pool2d(h + sc, 2)
+        return self.relu(self.conv2(self.relu(self.conv1(x))) + self.sc(x))
 
 
 class Generator(nn.Module):
-    """ResNet Generator: z(128) → 4×4 → 8 → 16 → 32 → 64 grayscale image."""
-
-    def __init__(self, z_dim=LATENT_DIM, ch=G_CH):
+    def __init__(self):
         super().__init__()
-        self.linear = nn.Linear(z_dim, (ch * 8) * 4 * 4)
-        self.blocks = nn.ModuleList([
-            ResBlockUp(ch * 8, ch * 4),   # 4 → 8
-            ResBlockUp(ch * 4, ch * 2),   # 8 → 16
-            ResBlockUp(ch * 2, ch),       # 16 → 32
-            ResBlockUp(ch, ch),           # 32 → 64
-        ])
-        self.out = nn.Sequential(
-            nn.BatchNorm2d(ch),
-            nn.ReLU(True),
-            nn.Conv2d(ch, CHANNELS, 3, 1, 1),
-            nn.Tanh(),
+        self.init_h = IMG_H // 16  # 4
+        self.init_w = IMG_W // 16  # 8
+        self.l1 = nn.Linear(LATENT_DIM, 512 * self.init_h * self.init_w)
+        self.main = nn.Sequential(
+            nn.BatchNorm2d(512),
+            nn.Upsample(scale_factor=2), ResBlock(512, 256),  # 4x8 → 8x16
+            nn.Upsample(scale_factor=2), ResBlock(256, 128),  # 8x16 → 16x32
+            nn.Upsample(scale_factor=2), ResBlock(128, 64),   # 16x32 → 32x64
+            nn.Upsample(scale_factor=2), ResBlock(64, 32),    # 32x64 → 64x128
+            nn.Conv2d(32, CHANNELS, 3, 1, 1), nn.Tanh()
         )
 
     def forward(self, z):
-        h = self.linear(z).view(-1, G_CH * 8, 4, 4)
-        for block in self.blocks:
-            h = block(h)
-        return self.out(h)
+        out = self.l1(z)
+        out = out.view(-1, 512, self.init_h, self.init_w)
+        return self.main(out)
 
 
 class Discriminator(nn.Module):
-    """ResNet Discriminator: 64×64 → scalar validity score."""
-
-    def __init__(self, ch=D_CH):
+    def __init__(self):
         super().__init__()
-        self.blocks = nn.ModuleList([
-            ResBlockDown(CHANNELS, ch, first_block=True),  # 64 → 32
-            ResBlockDown(ch, ch * 2),                      # 32 → 16
-            ResBlockDown(ch * 2, ch * 4),                  # 16 → 8
-            ResBlockDown(ch * 4, ch * 8),                  # 8 → 4
-        ])
-        self.out = nn.Sequential(
-            nn.ReLU(),
-            nn.AdaptiveAvgPool2d(1),
+        self.main = nn.Sequential(
+            ResBlock(CHANNELS, 64, stride=2),   # 64x128 → 32x64
+            ResBlock(64, 128, stride=2),        # 32x64 → 16x32
+            ResBlock(128, 256, stride=2),       # 16x32 → 8x16
+            ResBlock(256, 512, stride=2),       # 8x16 → 4x8
             nn.Flatten(),
-            nn.utils.spectral_norm(nn.Linear(ch * 8, 1)),
+            nn.utils.spectral_norm(nn.Linear(512 * (IMG_H // 16) * (IMG_W // 16), 1))
         )
 
     def forward(self, x):
-        h = x
-        for block in self.blocks:
-            h = block(h)
-        return self.out(h)
+        return self.main(x)
 
 
 # ── Exponential Moving Average (EMA) ───────────────────────────────────────
 
 class EMA:
-    """Maintains an exponential moving average of model parameters for
-    smoother, higher-quality generation at inference time."""
-
     def __init__(self, model, decay=0.999):
-        self.model = copy.deepcopy(model)
-        self.model.eval()
+        self.model = copy.deepcopy(model).eval()
         self.decay = decay
 
     @torch.no_grad()
     def update(self, model):
-        for ema_p, model_p in zip(self.model.parameters(), model.parameters()):
-            ema_p.data.mul_(self.decay).add_(model_p.data, alpha=1.0 - self.decay)
+        for ep, mp in zip(self.model.parameters(), model.parameters()):
+            ep.data.mul_(self.decay).add_(mp.data, alpha=1 - self.decay)
 
 
 # ── Training Loop ───────────────────────────────────────────────────────────
@@ -220,7 +124,7 @@ def train(args):
         "cuda" if torch.cuda.is_available()
         else ("mps" if torch.backends.mps.is_available() else "cpu")
     )
-    print(f"[DevGen GAN v3] Training on {device}")
+    print(f"[DevGen GAN] Training on {device}")
 
     G = Generator().to(device)
     D = Discriminator().to(device)
@@ -229,10 +133,24 @@ def train(args):
     opt_G = optim.Adam(G.parameters(), lr=1e-4, betas=(0.0, 0.9))
     opt_D = optim.Adam(D.parameters(), lr=4e-4, betas=(0.0, 0.9))
 
+    start_step = 0
+    ckpt_path = os.path.join(args.output_dir, "checkpoint.pth")
+
+    # Resume training if checkpoint exists
+    if os.path.exists(ckpt_path):
+        print(f"Loading checkpoint from {ckpt_path} to resume training...")
+        ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
+        G.load_state_dict(ckpt["G"])
+        D.load_state_dict(ckpt["D"])
+        ema.model.load_state_dict(ckpt["ema"])
+        opt_G.load_state_dict(ckpt["opt_G"])
+        opt_D.load_state_dict(ckpt["opt_D"])
+        start_step = ckpt["step"]
+        print(f"Resumed successfully from step {start_step}")
+
     transform = transforms.Compose([
-        transforms.Resize((IMG_SIZE, IMG_SIZE)),
+        transforms.Resize((IMG_H, IMG_W)),
         transforms.Grayscale(num_output_channels=CHANNELS),
-        transforms.RandomAffine(degrees=5, translate=(0.05, 0.05), scale=(0.9, 1.1)),
         transforms.ToTensor(),
         transforms.Normalize([0.5], [0.5]),
     ])
@@ -242,14 +160,26 @@ def train(args):
                         drop_last=True, num_workers=2, pin_memory=True)
 
     fixed_z = torch.randn(16, LATENT_DIM, device=device)
-    step = 0
-    n_critic = 2  # Train D twice per G step
-    pbar = tqdm(total=args.steps, desc="Training")
+    step = start_step
+    n_critic = 2
+    
+    # Calculate time limit
+    max_time_seconds = args.max_time_hours * 3600
+    start_time = time.time()
+    
+    print(f"Training for up to {args.max_time_hours} hours...")
 
-    while step < args.steps:
+    while True:
+        elapsed = time.time() - start_time
+        if elapsed > max_time_seconds:
+            print(f"\n⏰ Time limit reached ({elapsed/3600:.2f}h). Stopping safely.")
+            break
+
         for imgs, _ in loader:
-            if step >= args.steps:
+            elapsed = time.time() - start_time
+            if elapsed > max_time_seconds:
                 break
+                
             real = imgs.to(device)
             bs = real.size(0)
 
@@ -258,49 +188,62 @@ def train(args):
                 z = torch.randn(bs, LATENT_DIM, device=device)
                 with torch.no_grad():
                     fake = G(z)
-                d_real = D(DiffAugment(real))
-                d_fake = D(DiffAugment(fake))
+
+                # Safe DiffAugment (only translation)
+                d_real = D(DiffAugment(real, policy="translation"))
+                d_fake = D(DiffAugment(fake, policy="translation"))
+                
                 loss_D = F.relu(1.0 - d_real).mean() + F.relu(1.0 + d_fake).mean()
-                opt_D.zero_grad()
+                opt_D.zero_grad(set_to_none=True)
                 loss_D.backward()
                 opt_D.step()
 
             # ── Train Generator ──
             z = torch.randn(bs, LATENT_DIM, device=device)
             fake = G(z)
-            loss_G = -D(DiffAugment(fake)).mean()
-            opt_G.zero_grad()
+            loss_G = -D(DiffAugment(fake, policy="translation")).mean()
+            opt_G.zero_grad(set_to_none=True)
             loss_G.backward()
             opt_G.step()
 
-            # Update EMA
             ema.update(G)
-
             step += 1
-            pbar.update(1)
 
             if step % args.log_interval == 0:
-                pbar.set_postfix(D=f"{loss_D.item():.3f}", G=f"{loss_G.item():.3f}")
+                rate = step / max(1, elapsed)
+                print(f"Step {step} | D: {loss_D.item():.3f} | G: {loss_G.item():.3f} | {rate:.1f} steps/s")
 
             if step % args.sample_interval == 0:
                 with torch.no_grad():
-                    ema_samples = ema.model(fixed_z)
-                save_image(ema_samples, os.path.join(args.output_dir, f"samples/step_{step}.png"),
-                           nrow=4, normalize=True)
+                    s = ema.model(fixed_z)
+                save_image(s, os.path.join(args.output_dir, f"samples/step_{step}.png"), nrow=4, normalize=True)
+
+            if step % args.save_interval == 0:
                 torch.save(ema.model.state_dict(), os.path.join(args.output_dir, "generator_ema.pth"))
                 torch.save(G.state_dict(), os.path.join(args.output_dir, "generator.pth"))
+                torch.save({
+                    "step": step,
+                    "G": G.state_dict(),
+                    "D": D.state_dict(),
+                    "ema": ema.model.state_dict(),
+                    "opt_G": opt_G.state_dict(),
+                    "opt_D": opt_D.state_dict(),
+                }, ckpt_path)
 
-    pbar.close()
-    print(f"[DevGen GAN v3] Training complete. Models saved to {args.output_dir}/")
+    # Final save
+    torch.save(ema.model.state_dict(), os.path.join(args.output_dir, "generator_ema.pth"))
+    torch.save(G.state_dict(), os.path.join(args.output_dir, "generator.pth"))
+    print(f"[DevGen GAN] Training session finished at step {step}.")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="DevGen GAN v3 Training")
-    parser.add_argument("--data-dir", type=str, required=True, help="Path to training data (ImageFolder)")
-    parser.add_argument("--steps", type=int, default=100000, help="Total training steps")
-    parser.add_argument("--batch-size", type=int, default=64, help="Batch size")
-    parser.add_argument("--sample-interval", type=int, default=2000, help="Save samples every N steps")
+    parser = argparse.ArgumentParser(description="DevGen GAN Training")
+    parser.add_argument("--data-dir", type=str, required=True, help="Path to training data")
+    parser.add_argument("--batch-size", type=int, default=128, help="Batch size")
+    parser.add_argument("--sample-interval", type=int, default=1000, help="Save samples every N steps")
+    parser.add_argument("--save-interval", type=int, default=5000, help="Save models every N steps")
     parser.add_argument("--log-interval", type=int, default=100, help="Log losses every N steps")
     parser.add_argument("--output-dir", type=str, default="gan_outputs", help="Output directory")
+    parser.add_argument("--max-time-hours", type=float, default=10.0, help="Max training time before safe exit")
     args = parser.parse_args()
     train(args)

@@ -14,12 +14,14 @@ from pathlib import Path
 from typing import Optional
 
 import torch
+import cv2
+import numpy as np
 from PIL import Image
 from peft import PeftModel
 from transformers import AutoTokenizer, TrOCRProcessor, ViTImageProcessor, VisionEncoderDecoderModel
 
-DEFAULT_BASE_MODEL = "microsoft/trocr-base-handwritten"
-DEFAULT_ADAPTER_ROOT = "trocr-devanagari-lora"
+DEFAULT_BASE_MODEL = "paudelanil/trocr-devanagari-2"
+DEFAULT_ADAPTER_ROOT = "trocr-devanagari-lora-hf"
 DEFAULT_IMAGE_PROCESSOR = "google/vit-base-patch16-224-in21k"
 SPECIAL_TOKEN_NAMES = ("bos_token_id", "cls_token_id", "eos_token_id", "pad_token_id", "sep_token_id")
 
@@ -38,11 +40,26 @@ def get_best_torch_device() -> str:
 
 
 def load_trocr_processor(model_name: str, image_processor_source: Optional[str] = None) -> TrOCRProcessor:
+    # Try loading from the adapter source first if provided
+    if image_processor_source:
+        try:
+            image_processor = ViTImageProcessor.from_pretrained(image_processor_source)
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+            return TrOCRProcessor(image_processor=image_processor, tokenizer=tokenizer)
+        except Exception:
+            pass
+            
     try:
         return TrOCRProcessor.from_pretrained(model_name)
     except Exception as exc:
         print(f"[TrOCR Engine] Processor fallback for '{model_name}': {exc}")
-        image_processor = ViTImageProcessor.from_pretrained(image_processor_source or DEFAULT_IMAGE_PROCESSOR)
+        # Manually configure the processor to match the HF space's stable settings
+        image_processor = ViTImageProcessor.from_pretrained(DEFAULT_IMAGE_PROCESSOR)
+        # Force specific normalization parity
+        image_processor.image_mean = [0.5, 0.5, 0.5]
+        image_processor.image_std = [0.5, 0.5, 0.5]
+        image_processor.rescale_factor = 1.0 / 255.0
+        
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         return TrOCRProcessor(image_processor=image_processor, tokenizer=tokenizer)
 
@@ -203,11 +220,8 @@ class TrOCREngine:
         base_model.config.vocab_size = base_model.config.decoder.vocab_size
 
         if self.adapter_path:
-            peft_model = PeftModel.from_pretrained(base_model, self.adapter_path)
-            try:
-                self.model = peft_model.merge_and_unload()
-            except Exception:
-                self.model = peft_model
+            # We run as a pure PeftModel instead of merging to prevent MPS numerical drift
+            self.model = PeftModel.from_pretrained(base_model, self.adapter_path)
         else:
             self.model = base_model
 
@@ -242,11 +256,71 @@ class TrOCREngine:
             "cnn_available": self.cnn_classifier is not None and self.cnn_classifier.available,
         }
 
+    def _preprocess_image(self, image: Image.Image) -> Image.Image:
+        """Apply HF-style preprocessing: cropping and aspect-ratio preserving padding."""
+        # Convert PIL to OpenCV
+        img = np.array(image.convert("RGB"))
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+        h, w = img.shape[:2]
+        aspect_ratio = w / float(h)
+
+        # Helper: Crop to foreground
+        def crop_to_foreground(img_cv, padding_ratio=0.18):
+            gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
+            blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+            _, mask = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+            kernel = np.ones((3, 3), np.uint8)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            mask = cv2.dilate(mask, kernel, iterations=1)
+            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            if not contours: return img_cv
+            min_area = max(12, int(gray.shape[0] * gray.shape[1] * 0.0001))
+            boxes = [cv2.boundingRect(c) for c in contours if cv2.contourArea(c) >= min_area]
+            if not boxes: return img_cv
+            x1, y1, x2, y2 = min(x for x,_,_,_ in boxes), min(y for _,y,_,_ in boxes), max(x+bw for x,_,bw,_ in boxes), max(y+bh for _,y,_,bh in boxes)
+            pad_x, pad_y = max(8, int((x2 - x1) * padding_ratio)), max(8, int((y2 - y1) * padding_ratio))
+            x1, y1, x2, y2 = max(0, x1-pad_x), max(0, y1-pad_y), min(gray.shape[1], x2+pad_x), min(gray.shape[0], y2+pad_y)
+            return img_cv[y1:y2, x1:x2]
+
+        # Helper: Normalize to square (padding)
+        def normalize_to_square(img_cv, size=384):
+            ih, iw = img_cv.shape[:2]
+            scale = min(size / ih, size / iw)
+            nh, nw = int(ih * scale), int(iw * scale)
+            resized = cv2.resize(img_cv, (nw, nh), interpolation=cv2.INTER_AREA)
+            canvas = np.ones((size, size, 3), dtype=np.uint8) * 255
+            y_off, x_off = (size - nh) // 2, (size - nw) // 2
+            canvas[y_off:y_off+nh, x_off:x_off+nw] = resized
+            return canvas
+
+        # Apply logic based on aspect ratio
+        if aspect_ratio <= 1.55:
+            img = crop_to_foreground(img)
+        elif aspect_ratio > 2.2:
+            img = crop_to_foreground(img)
+            img = normalize_to_square(img)
+        
+        # Convert back to PIL
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        return Image.fromarray(img)
+
     def recognize(self, image: Image.Image, max_length: Optional[int] = None,
                   force_model: Optional[str] = None) -> dict:
-        if image.mode != "RGB":
-            image = image.convert("RGB")
+        """
+        Recognize text from an image. 
+        `force_model` can be: None (Auto), "cnn" (Character), or "trocr" (Word).
+        """
+        # Step 1: Preprocess (HF-style byte-level processing)
+        import io
+        from backend.preprocessing import preprocess_for_ocr
+        buf = io.BytesIO()
+        image.save(buf, format="PNG")
+        # This ensures parity with the HF space's preprocessing logic
+        processed_image = preprocess_for_ocr(buf.getvalue())
 
+        # Step 2: Routing (Manual or Auto)
+        print(f"[TrOCR Engine] recognize: force_model={force_model}")
         if force_model == "cnn" and self.cnn_classifier and self.cnn_classifier.available:
             use_cnn = True
             routing_info = {"type": "character", "confidence": 1.0, "reason": "forced"}
@@ -254,17 +328,18 @@ class TrOCREngine:
             use_cnn = False
             routing_info = {"type": "word", "confidence": 1.0, "reason": "forced"}
         else:
-            # Auto-routing
+            # Auto-routing using the preprocessed image for better accuracy
             from backend.image_router import classify_input_type
-            routing_info = classify_input_type(image)
+            routing_info = classify_input_type(processed_image)
             if routing_info["type"] == "character" and self.cnn_classifier and self.cnn_classifier.available:
                 use_cnn = True
             else:
                 use_cnn = False
+        print(f"[TrOCR Engine] Routing decision: use_cnn={use_cnn}, type={routing_info['type']}")
 
         # Route to CNN for single characters
         if use_cnn and self.cnn_classifier and self.cnn_classifier.available:
-            result = self.cnn_classifier.predict(image)
+            result = self.cnn_classifier.predict(processed_image)
             result["routing"] = routing_info
             result["tokens"] = [result["text"]]
             result["confidence_scores"] = [result["confidence"]]
@@ -276,6 +351,7 @@ class TrOCREngine:
                 "using_adapter": bool(self.adapter_path),
                 "device": self.device,
                 "model_used": "cnn_classifier",
+                "force_model_received": force_model,
             }
             return result
 
@@ -283,14 +359,16 @@ class TrOCREngine:
         requested_max_length = max_length or self.default_max_length
         started_at = time.perf_counter()
 
-        pixel_values = self.processor(images=image, return_tensors="pt").pixel_values
+        pixel_values = self.processor(images=processed_image, return_tensors="pt").pixel_values
         pixel_values = pixel_values.to(self.device)
 
         with torch.inference_mode():
             outputs = self.model.generate(
-                pixel_values,
+                inputs=pixel_values,
                 max_length=requested_max_length,
                 num_beams=4,
+                early_stopping=True,
+                decoder_start_token_id=self.model.config.decoder_start_token_id,
                 return_dict_in_generate=True,
                 output_scores=True,
             )
@@ -313,6 +391,7 @@ class TrOCREngine:
                 "using_adapter": bool(self.adapter_path),
                 "device": self.device,
                 "model_used": "trocr_lora",
+                "force_model_received": force_model,
             },
         }
 

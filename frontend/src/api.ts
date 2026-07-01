@@ -70,18 +70,20 @@ export async function fetchPaginatedSamples(
   return response.data;
 }
 
-export async function recognizeDocument(file: File) {
+export async function recognizeDocument(file: File, forceModel?: string) {
   const form = new FormData();
   form.append("file", file);
+  form.append("force_model", forceModel || "");
   return await request<any>("/api/v1/recognize", {
     method: "POST",
     body: form,
   });
 }
 
-export async function recognizeFull(file: File) {
+export async function recognizeFull(file: File, forceModel?: string) {
   const form = new FormData();
   form.append("file", file);
+  form.append("force_model", forceModel || "");
   return await request<any>("/api/v1/recognize/full", {
     method: "POST",
     body: form,
@@ -113,4 +115,30 @@ export async function extractNER(text: string) {
     body: JSON.stringify({ text }),
   });
   return response.data;
+}
+
+export async function generateHandwriting(count: number = 4) {
+  return await request<{ status: string; count: number; images: Array<{ image_base64: string; index: number }> }>("/api/v1/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ count }),
+  });
+}
+
+export async function fetchGenerateInfo() {
+  const response = await request<{ status: string; data: any }>("/api/v1/generate/info");
+  return response.data;
+}
+
+export async function fetchLDMInfo() {
+  const response = await request<{ status: string; data: any }>("/api/v1/generate/ldm/info");
+  return response.data;
+}
+
+export async function generateLDMHandwriting(text: string, font_path: string = "font.ttf", conditioning_scale: number = 1.0) {
+  return await request<{ status: string; text: string; generated_image_base64: string; control_image_base64: string }>("/api/v1/generate/ldm", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, font_path, conditioning_scale }),
+  });
 }

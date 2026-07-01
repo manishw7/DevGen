@@ -14,6 +14,7 @@ import Recognize from './pages/Recognize';
 import DatasetExplorer from './pages/DatasetExplorer';
 import Evaluate from './pages/Evaluate';
 import NERPage from './pages/NERPage';
+import GenerativeSuite from './pages/GenerativeSuite';
 
 function App() {
 
@@ -23,10 +24,10 @@ function App() {
     { path: '/dataset', icon: Database, label: 'Dataset Explorer' },
     { path: '/evaluate', icon: BarChart3, label: 'CER Evaluation' },
     { path: '/ner', icon: BookOpen, label: 'NER Extraction' },
+    { path: '/generate', icon: Sparkles, label: 'Generative Suite' },
   ];
 
   const futureItems = [
-    { icon: Sparkles, label: 'Generative Suite' },
     { icon: Settings, label: 'Settings' },
   ];
 
@@ -91,6 +92,7 @@ function App() {
           <Route path="/dataset" element={<DatasetExplorer />} />
           <Route path="/evaluate" element={<Evaluate />} />
           <Route path="/ner" element={<NERPage />} />
+          <Route path="/generate" element={<GenerativeSuite />} />
         </Routes>
       </main>
     </div>
