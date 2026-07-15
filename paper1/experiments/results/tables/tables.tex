@@ -1,0 +1,19 @@
+\begin{table}[t]
+  \centering
+  \caption{Test-split results on IIIT-INDIC-HW-WORDS-Hindi. CER: character error rate (NFC codepoints); AER: akshara error rate; WAcc: word recognition accuracy.}
+  \label{tab:main}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Run & Trainable & CER $\downarrow$ & AER $\downarrow$ & WAcc $\uparrow$ \\
+    \midrule
+    full\_ft & 184.08M & 0.0961 & 0.1192 & 0.7980 \\
+    lora\_r16\_legacy & 4.62M & 0.1013 & 0.1307 & 0.7786 \\
+    lora\_r16\_attn\_ffn & 4.62M & 0.1022 & 0.1315 & 0.7774 \\
+    lora\_r32\_attn & 4.72M & 0.1030 & 0.1326 & 0.7760 \\
+    lora\_r16\_attn & 2.36M & 0.1065 & 0.1368 & 0.7691 \\
+    lora\_r8\_attn & 1.18M & 0.1095 & 0.1411 & 0.7614 \\
+    lora\_r4\_attn & 0.59M & 0.1141 & 0.1466 & 0.7534 \\
+    base\_prep & 184.08M & 0.1695 & 0.2213 & 0.6461 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

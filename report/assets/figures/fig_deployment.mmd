@@ -1,0 +1,18 @@
+flowchart TB
+  subgraph Dev["Developer Machine (Apple Silicon, macOS)"]
+    subgraph Browser["Web Browser"]
+      SPA["React SPA :5173 (Vite)"]
+    end
+    subgraph Node["Frontend Container / nginx"]
+      NG["Static assets"]
+    end
+    subgraph Py["Python Runtime (.venv)"]
+      UV["Uvicorn + FastAPI :8000"]
+      MPS["PyTorch MPS (Metal GPU)"]
+    end
+    FS["Local FS: adapters, checkpoints, datasets"]
+  end
+  SPA -->|REST| UV
+  NG --- SPA
+  UV --> MPS
+  UV --> FS

@@ -1,0 +1,599 @@
+11.8s 1 0.00s - Debugger warning: It seems that frozen modules are being used, which may
+11.8s 2 0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+11.8s 3 0.00s - to python to disable frozen modules.
+11.8s 4 0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+12.6s 5 0.00s - Debugger warning: It seems that frozen modules are being used, which may
+12.6s 6 0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+12.6s 7 0.00s - to python to disable frozen modules.
+12.6s 8 0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+19.5s 9 [?25l     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/44.0 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m44.0/44.0 kB[0m [31m1.6 MB/s[0m eta [36m0:00:00[0m
+20.6s 10 [?25h[?25l   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/12.0 MB[0m [31m?[0m eta [36m-:--:--[0m[2K   [91m━━[0m[90m╺[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.7/12.0 MB[0m [31m21.3 MB/s[0m eta [36m0:00:01[0m[2K   [91m━━━━━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━[0m [32m5.9/12.0 MB[0m [31m85.7 MB/s[0m eta [36m0:00:01[0m[2K   [91m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[91m╸[0m [32m12.0/12.0 MB[0m [31m223.3 MB/s[0m eta [36m0:00:01[0m[2K   [91m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[91m╸[0m [32m12.0/12.0 MB[0m [31m223.3 MB/s[0m eta [36m0:00:01[0m[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m12.0/12.0 MB[0m [31m100.4 MB/s[0m eta [36m0:00:00[0m
+20.7s 11 [?25h[?25l   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/566.4 kB[0m [31m?[0m eta [36m-:--:--[0m[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m566.4/566.4 kB[0m [31m28.6 MB/s[0m eta [36m0:00:00[0m
+44.6s 12 [?25hcuda: True Tesla T4
+83.4s 13 total 1849908
+83.4s 14 drwxr-xr-x 2 root root      4096 Jul  3 03:44 .
+83.4s 15 drwxr-xr-x 3 root root      4096 Jul  3 03:44 ..
+83.4s 16 -rw-r--r-- 1 root root 254946812 Jul  3 03:44 test-00000-of-00001.parquet
+83.4s 17 -rw-r--r-- 1 root root 460654045 Jul  3 03:44 train-00000-of-00003.parquet
+83.4s 18 -rw-r--r-- 1 root root 461402568 Jul  3 03:44 train-00001-of-00003.parquet
+83.4s 19 -rw-r--r-- 1 root root 459281619 Jul  3 03:44 train-00002-of-00003.parquet
+83.4s 20 -rw-r--r-- 1 root root 257989239 Jul  3 03:44 validation-00000-of-00001.parquet
+83.5s 21 package dirs ready
+83.5s 22 Writing backend/preprocessing.py
+83.5s 23 Writing paper1/experiments/akshara.py
+83.6s 24 Writing paper1/experiments/common.py
+83.6s 25 Writing paper2/ldm/tokenizer.py
+83.6s 26 Writing paper2/ldm/train_ldm.py
+83.6s 27 Writing paper2/ldm/sample_ldm.py
+83.6s 28 Writing paper2/experiments/content_fidelity.py
+83.6s 29 Writing paper2/experiments/compute_fid.py
+83.7s 30 Writing paper2/experiments/vocab/iv.txt
+83.7s 31 Writing paper2/experiments/vocab/oov_seen.txt
+83.7s 32 Writing paper2/experiments/vocab/oov_unseen_conjunct.txt
+83.7s 33 OK: seen conjunct = 1 akshara token; unseen conjunct decomposes to codepoints
+83.7s 34 judge adapter: none (base recognizer will judge)
+83.8s 35 >> python -m paper2.ldm.train_ldm --mode akshara --parquet-dir data/iiit_hindi_parquet --output-dir paper2/runs/ldm_akshara --epochs 150 --seed 42 --batch-size 256 --save-every 10 --preview-every 25
+90.1s 36 Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 2000 examples [00:00, 14758.54 examples/s]Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 2000 examples [00:00, 14758.54 examples/s]
+90.3s 37 Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 2000 examples [00:00, 14758.54 examples/s]Generating train split: 5800 examples [00:00, 26416.08 examples/s]Generating train split: 9600 examples [00:00, 29667.86 examples/s]Generating train split: 5800 examples [00:00, 26416.08 examples/s]Generating train split: 9600 examples [00:00, 29667.86 examples/s]
+90.5s 38 Generating train split: 5800 examples [00:00, 26416.08 examples/s]Generating train split: 9600 examples [00:00, 29667.86 examples/s]Generating train split: 13400 examples [00:00, 32427.87 examples/s]Generating train split: 17600 examples [00:00, 35548.17 examples/s]Generating train split: 13400 examples [00:00, 32427.87 examples/s]Generating train split: 17600 examples [00:00, 35548.17 examples/s]
+90.7s 39 Generating train split: 13400 examples [00:00, 32427.87 examples/s]Generating train split: 17600 examples [00:00, 35548.17 examples/s]Generating train split: 21300 examples [00:00, 34400.29 examples/s]Generating train split: 25285 examples [00:00, 32139.22 examples/s]Generating train split: 21300 examples [00:00, 34400.29 examples/s]Generating train split: 25285 examples [00:00, 32139.22 examples/s]
+91.0s 40 Generating train split: 21300 examples [00:00, 34400.29 examples/s]Generating train split: 25285 examples [00:00, 32139.22 examples/s]Generating train split: 29185 examples [00:00, 33861.08 examples/s]Generating train split: 33085 examples [00:01, 34041.02 examples/s]Generating train split: 29185 examples [00:00, 33861.08 examples/s]Generating train split: 33085 examples [00:01, 34041.02 examples/s]
+91.3s 41 Generating train split: 29185 examples [00:00, 33861.08 examples/s]Generating train split: 33085 examples [00:01, 34041.02 examples/s]Generating train split: 37885 examples [00:01, 32327.80 examples/s]Generating train split: 41685 examples [00:01, 33670.53 examples/s]Generating train split: 37885 examples [00:01, 32327.80 examples/s]Generating train split: 41685 examples [00:01, 33670.53 examples/s]
+91.5s 42 Generating train split: 37885 examples [00:01, 32327.80 examples/s]Generating train split: 41685 examples [00:01, 33670.53 examples/s]Generating train split: 46669 examples [00:01, 32925.87 examples/s]Generating train split: 51769 examples [00:01, 37369.72 examples/s]Generating train split: 46669 examples [00:01, 32925.87 examples/s]Generating train split: 51769 examples [00:01, 37369.72 examples/s]
+91.7s 43 Generating train split: 46669 examples [00:01, 32925.87 examples/s]Generating train split: 51769 examples [00:01, 37369.72 examples/s]Generating train split: 55869 examples [00:01, 37735.43 examples/s]Generating train split: 60669 examples [00:01, 35474.31 examples/s]Generating train split: 55869 examples [00:01, 37735.43 examples/s]Generating train split: 60669 examples [00:01, 35474.31 examples/s]
+91.9s 44 Generating train split: 55869 examples [00:01, 37735.43 examples/s]Generating train split: 60669 examples [00:01, 35474.31 examples/s]Generating train split: 65869 examples [00:01, 35006.75 examples/s]Generating train split: 69853 examples [00:02, 35980.51 examples/s]Generating train split: 69853 examples [00:02, 33935.74 examples/s]
+92.0s 45 Generating train split: 65869 examples [00:01, 35006.75 examples/s]Generating train split: 69853 examples [00:02, 35980.51 examples/s]Generating train split: 69853 examples [00:02, 33935.74 examples/s]
+92.0s 46 
+92.0s 47 Generating train split: 65869 examples [00:01, 35006.75 examples/s]Generating train split: 69853 examples [00:02, 35980.51 examples/s]Generating train split: 69853 examples [00:02, 33935.74 examples/s]
+146.1s 48 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+146.1s 49 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+146.3s 50 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+146.3s 51 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+146.3s 52 
+146.3s 53 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+146.3s 54 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+844.6s 55 /kaggle/working/paper2/ldm/train_ldm.py:83: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+844.6s 56 self.encoder = nn.TransformerEncoder(layer, num_layers=2)
+844.7s 57 [train] mode=akshara vocab=1791 max_len=9
+844.7s 58 [latents] 5000/69853
+844.7s 59 [latents] 10000/69853
+844.7s 60 [latents] 15000/69853
+844.7s 61 [latents] 20000/69853
+844.7s 62 [latents] 25000/69853
+844.7s 63 [latents] 30000/69853
+844.7s 64 [latents] 35000/69853
+844.7s 65 [latents] 40000/69853
+844.7s 66 [latents] 45000/69853
+844.7s 67 [latents] 50000/69853
+844.7s 68 [latents] 55000/69853
+844.7s 69 [latents] 60000/69853
+844.7s 70 [latents] 65000/69853
+844.7s 71 [latents] Cached 69853 latents -> paper2/runs/latents_train.pt (293 MB)
+844.7s 72 [train] trainable params: 76.1M — 272 steps/epoch
+844.8s 73 /kaggle/working/paper2/ldm/train_ldm.py:83: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+844.8s 74 self.encoder = nn.TransformerEncoder(layer, num_layers=2)
+844.8s 75 
+844.8s 76 /kaggle/working/paper2/ldm/train_ldm.py:83: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+844.8s 77 self.encoder = nn.TransformerEncoder(layer, num_layers=2)
+844.9s 78 [train] mode=akshara vocab=1791 max_len=9
+844.9s 79 [latents] 5000/69853
+844.9s 80 [latents] 10000/69853
+844.9s 81 [latents] 15000/69853
+844.9s 82 [latents] 20000/69853
+844.9s 83 [latents] 25000/69853
+844.9s 84 [latents] 30000/69853
+844.9s 85 [latents] 35000/69853
+844.9s 86 [latents] 40000/69853
+844.9s 87 [latents] 45000/69853
+844.9s 88 [latents] 50000/69853
+844.9s 89 [latents] 55000/69853
+844.9s 90 [latents] 60000/69853
+844.9s 91 [latents] 65000/69853
+844.9s 92 [latents] Cached 69853 latents -> paper2/runs/latents_train.pt (293 MB)
+844.9s 93 [train] trainable params: 76.1M — 272 steps/epoch
+1044.6s 94 [train] epoch 1/150  loss 0.2366
+1044.8s 95 [train] epoch 1/150  loss 0.2366
+1242.6s 96 [train] epoch 2/150  loss 0.1619
+1242.8s 97 [train] epoch 2/150  loss 0.1619
+1441.2s 98 [train] epoch 3/150  loss 0.1484
+1441.4s 99 [train] epoch 3/150  loss 0.1484
+1639.5s 100 [train] epoch 4/150  loss 0.1421
+1639.7s 101 [train] epoch 4/150  loss 0.1421
+1837.6s 102 [train] epoch 5/150  loss 0.1372
+1837.8s 103 [train] epoch 5/150  loss 0.1372
+2036.0s 104 [train] epoch 6/150  loss 0.1329
+2036.3s 105 [train] epoch 6/150  loss 0.1329
+2234.4s 106 [train] epoch 7/150  loss 0.1294
+2234.6s 107 [train] epoch 7/150  loss 0.1294
+2432.5s 108 [train] epoch 8/150  loss 0.1288
+2432.7s 109 [train] epoch 8/150  loss 0.1288
+2631.1s 110 [train] epoch 9/150  loss 0.1267
+2631.3s 111 [train] epoch 9/150  loss 0.1267
+2829.8s 112 [train] epoch 10/150  loss 0.1259
+2830.0s 113 [train] epoch 10/150  loss 0.1259
+2831.8s 114 [train] checkpoint @ epoch 10 -> paper2/runs/ldm_akshara/checkpoint.pt
+2832.0s 115 [train] checkpoint @ epoch 10 -> paper2/runs/ldm_akshara/checkpoint.pt
+3030.5s 116 [train] epoch 11/150  loss 0.1236
+3030.7s 117 [train] epoch 11/150  loss 0.1236
+3229.1s 118 [train] epoch 12/150  loss 0.1232
+3229.3s 119 [train] epoch 12/150  loss 0.1232
+3427.7s 120 [train] epoch 13/150  loss 0.1211
+3428.0s 121 [train] epoch 13/150  loss 0.1211
+3626.4s 122 [train] epoch 14/150  loss 0.1210
+3626.6s 123 [train] epoch 14/150  loss 0.1210
+3825.0s 124 [train] epoch 15/150  loss 0.1194
+3825.2s 125 [train] epoch 15/150  loss 0.1194
+4023.6s 126 [train] epoch 16/150  loss 0.1187
+4023.8s 127 [train] epoch 16/150  loss 0.1187
+4222.2s 128 [train] epoch 17/150  loss 0.1184
+4222.4s 129 [train] epoch 17/150  loss 0.1184
+4420.9s 130 [train] epoch 18/150  loss 0.1165
+4421.1s 131 [train] epoch 18/150  loss 0.1165
+4620.1s 132 [train] epoch 19/150  loss 0.1159
+4620.3s 133 [train] epoch 19/150  loss 0.1159
+4818.8s 134 [train] epoch 20/150  loss 0.1142
+4819.0s 135 [train] epoch 20/150  loss 0.1142
+4821.2s 136 [train] checkpoint @ epoch 20 -> paper2/runs/ldm_akshara/checkpoint.pt
+4821.4s 137 [train] checkpoint @ epoch 20 -> paper2/runs/ldm_akshara/checkpoint.pt
+5019.8s 138 [train] epoch 21/150  loss 0.1142
+5020.0s 139 [train] epoch 21/150  loss 0.1142
+5218.6s 140 [train] epoch 22/150  loss 0.1133
+5218.8s 141 [train] epoch 22/150  loss 0.1133
+5417.2s 142 [train] epoch 23/150  loss 0.1131
+5417.5s 143 [train] epoch 23/150  loss 0.1131
+5616.0s 144 [train] epoch 24/150  loss 0.1121
+5616.2s 145 [train] epoch 24/150  loss 0.1121
+5814.7s 146 [train] epoch 25/150  loss 0.1123
+5814.9s 147 [train] epoch 25/150  loss 0.1123
+5818.0s 148 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0025.png
+5818.2s 149 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0025.png
+6016.6s 150 [train] epoch 26/150  loss 0.1106
+6016.9s 151 [train] epoch 26/150  loss 0.1106
+6215.8s 152 [train] epoch 27/150  loss 0.1104
+6216.0s 153 [train] epoch 27/150  loss 0.1104
+6414.4s 154 [train] epoch 28/150  loss 0.1097
+6414.6s 155 [train] epoch 28/150  loss 0.1097
+6613.1s 156 [train] epoch 29/150  loss 0.1093
+6613.3s 157 [train] epoch 29/150  loss 0.1093
+6811.8s 158 [train] epoch 30/150  loss 0.1080
+6812.0s 159 [train] epoch 30/150  loss 0.1080
+6814.2s 160 [train] checkpoint @ epoch 30 -> paper2/runs/ldm_akshara/checkpoint.pt
+6814.4s 161 [train] checkpoint @ epoch 30 -> paper2/runs/ldm_akshara/checkpoint.pt
+7013.0s 162 [train] epoch 31/150  loss 0.1090
+7013.2s 163 [train] epoch 31/150  loss 0.1090
+7211.7s 164 [train] epoch 32/150  loss 0.1070
+7211.9s 165 [train] epoch 32/150  loss 0.1070
+7410.5s 166 [train] epoch 33/150  loss 0.1074
+7410.7s 167 [train] epoch 33/150  loss 0.1074
+7609.7s 168 [train] epoch 34/150  loss 0.1071
+7609.9s 169 [train] epoch 34/150  loss 0.1071
+7808.4s 170 [train] epoch 35/150  loss 0.1066
+7808.6s 171 [train] epoch 35/150  loss 0.1066
+8007.0s 172 [train] epoch 36/150  loss 0.1063
+8007.2s 173 [train] epoch 36/150  loss 0.1063
+8205.4s 174 [train] epoch 37/150  loss 0.1056
+8205.7s 175 [train] epoch 37/150  loss 0.1056
+8403.6s 176 [train] epoch 38/150  loss 0.1060
+8403.8s 177 [train] epoch 38/150  loss 0.1060
+8602.0s 178 [train] epoch 39/150  loss 0.1047
+8602.2s 179 [train] epoch 39/150  loss 0.1047
+8800.6s 180 [train] epoch 40/150  loss 0.1048
+8800.8s 181 [train] epoch 40/150  loss 0.1048
+8803.0s 182 [train] checkpoint @ epoch 40 -> paper2/runs/ldm_akshara/checkpoint.pt
+8803.2s 183 [train] checkpoint @ epoch 40 -> paper2/runs/ldm_akshara/checkpoint.pt
+9001.6s 184 [train] epoch 41/150  loss 0.1040
+9001.8s 185 [train] epoch 41/150  loss 0.1040
+9200.4s 186 [train] epoch 42/150  loss 0.1041
+9200.6s 187 [train] epoch 42/150  loss 0.1041
+9398.9s 188 [train] epoch 43/150  loss 0.1043
+9399.1s 189 [train] epoch 43/150  loss 0.1043
+9597.3s 190 [train] epoch 44/150  loss 0.1049
+9597.5s 191 [train] epoch 44/150  loss 0.1049
+9795.6s 192 [train] epoch 45/150  loss 0.1044
+9795.8s 193 [train] epoch 45/150  loss 0.1044
+9994.0s 194 [train] epoch 46/150  loss 0.1042
+9994.2s 195 [train] epoch 46/150  loss 0.1042
+10192.4s 196 [train] epoch 47/150  loss 0.1041
+10192.6s 197 [train] epoch 47/150  loss 0.1041
+10390.8s 198 [train] epoch 48/150  loss 0.1032
+10391.0s 199 [train] epoch 48/150  loss 0.1032
+10589.3s 200 [train] epoch 49/150  loss 0.1030
+10589.5s 201 [train] epoch 49/150  loss 0.1030
+10787.8s 202 [train] epoch 50/150  loss 0.1031
+10788.0s 203 [train] epoch 50/150  loss 0.1031
+10793.5s 204 [train] checkpoint @ epoch 50 -> paper2/runs/ldm_akshara/checkpoint.pt
+10793.5s 205 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0050.png
+10793.7s 206 [train] checkpoint @ epoch 50 -> paper2/runs/ldm_akshara/checkpoint.pt
+10793.7s 207 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0050.png
+10992.0s 208 [train] epoch 51/150  loss 0.1026
+10992.2s 209 [train] epoch 51/150  loss 0.1026
+11190.5s 210 [train] epoch 52/150  loss 0.1016
+11190.7s 211 [train] epoch 52/150  loss 0.1016
+11389.0s 212 [train] epoch 53/150  loss 0.1023
+11389.2s 213 [train] epoch 53/150  loss 0.1023
+11587.5s 214 [train] epoch 54/150  loss 0.1018
+11587.8s 215 [train] epoch 54/150  loss 0.1018
+11786.1s 216 [train] epoch 55/150  loss 0.1010
+11786.3s 217 [train] epoch 55/150  loss 0.1010
+11984.6s 218 [train] epoch 56/150  loss 0.1016
+11984.9s 219 [train] epoch 56/150  loss 0.1016
+12183.1s 220 [train] epoch 57/150  loss 0.1014
+12183.3s 221 [train] epoch 57/150  loss 0.1014
+12381.5s 222 [train] epoch 58/150  loss 0.1009
+12381.7s 223 [train] epoch 58/150  loss 0.1009
+12580.6s 224 [train] epoch 59/150  loss 0.1004
+12580.8s 225 [train] epoch 59/150  loss 0.1004
+12779.2s 226 [train] epoch 60/150  loss 0.1005
+12779.4s 227 [train] epoch 60/150  loss 0.1005
+12781.6s 228 [train] checkpoint @ epoch 60 -> paper2/runs/ldm_akshara/checkpoint.pt
+12781.8s 229 [train] checkpoint @ epoch 60 -> paper2/runs/ldm_akshara/checkpoint.pt
+12980.3s 230 [train] epoch 61/150  loss 0.1015
+12980.5s 231 [train] epoch 61/150  loss 0.1015
+13178.8s 232 [train] epoch 62/150  loss 0.1000
+13179.0s 233 [train] epoch 62/150  loss 0.1000
+13377.2s 234 [train] epoch 63/150  loss 0.1017
+13377.4s 235 [train] epoch 63/150  loss 0.1017
+13575.8s 236 [train] epoch 64/150  loss 0.1006
+13576.0s 237 [train] epoch 64/150  loss 0.1006
+13774.4s 238 [train] epoch 65/150  loss 0.0999
+13774.6s 239 [train] epoch 65/150  loss 0.0999
+13972.9s 240 [train] epoch 66/150  loss 0.1004
+13973.2s 241 [train] epoch 66/150  loss 0.1004
+14171.8s 242 [train] epoch 67/150  loss 0.0991
+14172.0s 243 [train] epoch 67/150  loss 0.0991
+14370.3s 244 [train] epoch 68/150  loss 0.1005
+14370.5s 245 [train] epoch 68/150  loss 0.1005
+14568.6s 246 [train] epoch 69/150  loss 0.1001
+14568.9s 247 [train] epoch 69/150  loss 0.1001
+14767.0s 248 [train] epoch 70/150  loss 0.0996
+14767.3s 249 [train] epoch 70/150  loss 0.0996
+14769.4s 250 [train] checkpoint @ epoch 70 -> paper2/runs/ldm_akshara/checkpoint.pt
+14769.6s 251 [train] checkpoint @ epoch 70 -> paper2/runs/ldm_akshara/checkpoint.pt
+14968.0s 252 [train] epoch 71/150  loss 0.0995
+14968.2s 253 [train] epoch 71/150  loss 0.0995
+15166.4s 254 [train] epoch 72/150  loss 0.0999
+15166.6s 255 [train] epoch 72/150  loss 0.0999
+15364.8s 256 [train] epoch 73/150  loss 0.0996
+15365.0s 257 [train] epoch 73/150  loss 0.0996
+15563.9s 258 [train] epoch 74/150  loss 0.0981
+15564.1s 259 [train] epoch 74/150  loss 0.0981
+15762.5s 260 [train] epoch 75/150  loss 0.1001
+15762.7s 261 [train] epoch 75/150  loss 0.1001
+15765.4s 262 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0075.png
+15765.6s 263 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0075.png
+15964.0s 264 [train] epoch 76/150  loss 0.0995
+15964.2s 265 [train] epoch 76/150  loss 0.0995
+16162.5s 266 [train] epoch 77/150  loss 0.0986
+16162.8s 267 [train] epoch 77/150  loss 0.0986
+16361.2s 268 [train] epoch 78/150  loss 0.0982
+16361.4s 269 [train] epoch 78/150  loss 0.0982
+16559.9s 270 [train] epoch 79/150  loss 0.0976
+16560.1s 271 [train] epoch 79/150  loss 0.0976
+16758.4s 272 [train] epoch 80/150  loss 0.0980
+16758.6s 273 [train] epoch 80/150  loss 0.0980
+16760.9s 274 [train] checkpoint @ epoch 80 -> paper2/runs/ldm_akshara/checkpoint.pt
+16761.1s 275 [train] checkpoint @ epoch 80 -> paper2/runs/ldm_akshara/checkpoint.pt
+16959.4s 276 [train] epoch 81/150  loss 0.0987
+16959.6s 277 [train] epoch 81/150  loss 0.0987
+17158.5s 278 [train] epoch 82/150  loss 0.0984
+17158.7s 279 [train] epoch 82/150  loss 0.0984
+17357.2s 280 [train] epoch 83/150  loss 0.0981
+17357.4s 281 [train] epoch 83/150  loss 0.0981
+17556.0s 282 [train] epoch 84/150  loss 0.0978
+17556.2s 283 [train] epoch 84/150  loss 0.0978
+17754.9s 284 [train] epoch 85/150  loss 0.0988
+17755.1s 285 [train] epoch 85/150  loss 0.0988
+17953.6s 286 [train] epoch 86/150  loss 0.0975
+17953.8s 287 [train] epoch 86/150  loss 0.0975
+18152.3s 288 [train] epoch 87/150  loss 0.0974
+18152.5s 289 [train] epoch 87/150  loss 0.0974
+18351.0s 290 [train] epoch 88/150  loss 0.0970
+18351.2s 291 [train] epoch 88/150  loss 0.0970
+18549.7s 292 [train] epoch 89/150  loss 0.0974
+18549.9s 293 [train] epoch 89/150  loss 0.0974
+18748.9s 294 [train] epoch 90/150  loss 0.0980
+18749.1s 295 [train] epoch 90/150  loss 0.0980
+18751.5s 296 [train] checkpoint @ epoch 90 -> paper2/runs/ldm_akshara/checkpoint.pt
+18751.7s 297 [train] checkpoint @ epoch 90 -> paper2/runs/ldm_akshara/checkpoint.pt
+18950.3s 298 [train] epoch 91/150  loss 0.0976
+18950.5s 299 [train] epoch 91/150  loss 0.0976
+19149.1s 300 [train] epoch 92/150  loss 0.0986
+19149.3s 301 [train] epoch 92/150  loss 0.0986
+19347.8s 302 [train] epoch 93/150  loss 0.0974
+19348.1s 303 [train] epoch 93/150  loss 0.0974
+19546.7s 304 [train] epoch 94/150  loss 0.0965
+19546.9s 305 [train] epoch 94/150  loss 0.0965
+19745.5s 306 [train] epoch 95/150  loss 0.0976
+19745.7s 307 [train] epoch 95/150  loss 0.0976
+19944.3s 308 [train] epoch 96/150  loss 0.0967
+19944.5s 309 [train] epoch 96/150  loss 0.0967
+20143.0s 310 [train] epoch 97/150  loss 0.0974
+20143.3s 311 [train] epoch 97/150  loss 0.0974
+20342.1s 312 [train] epoch 98/150  loss 0.0970
+20342.3s 313 [train] epoch 98/150  loss 0.0970
+20540.6s 314 [train] epoch 99/150  loss 0.0971
+20540.8s 315 [train] epoch 99/150  loss 0.0971
+20738.9s 316 [train] epoch 100/150  loss 0.0967
+20739.2s 317 [train] epoch 100/150  loss 0.0967
+20744.6s 318 [train] checkpoint @ epoch 100 -> paper2/runs/ldm_akshara/checkpoint.pt
+20744.6s 319 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0100.png
+20744.8s 320 [train] checkpoint @ epoch 100 -> paper2/runs/ldm_akshara/checkpoint.pt
+20744.8s 321 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0100.png
+20943.1s 322 [train] epoch 101/150  loss 0.0966
+20943.3s 323 [train] epoch 101/150  loss 0.0966
+21141.4s 324 [train] epoch 102/150  loss 0.0957
+21141.7s 325 [train] epoch 102/150  loss 0.0957
+21339.7s 326 [train] epoch 103/150  loss 0.0967
+21339.9s 327 [train] epoch 103/150  loss 0.0967
+21538.0s 328 [train] epoch 104/150  loss 0.0961
+21538.2s 329 [train] epoch 104/150  loss 0.0961
+21736.2s 330 [train] epoch 105/150  loss 0.0964
+21736.5s 331 [train] epoch 105/150  loss 0.0964
+21934.9s 332 [train] epoch 106/150  loss 0.0968
+21935.1s 333 [train] epoch 106/150  loss 0.0968
+22133.3s 334 [train] epoch 107/150  loss 0.0951
+22133.5s 335 [train] epoch 107/150  loss 0.0951
+22331.9s 336 [train] epoch 108/150  loss 0.0958
+22332.1s 337 [train] epoch 108/150  loss 0.0958
+22530.6s 338 [train] epoch 109/150  loss 0.0954
+22530.8s 339 [train] epoch 109/150  loss 0.0954
+22729.3s 340 [train] epoch 110/150  loss 0.0948
+22729.5s 341 [train] epoch 110/150  loss 0.0948
+22731.9s 342 [train] checkpoint @ epoch 110 -> paper2/runs/ldm_akshara/checkpoint.pt
+22732.1s 343 [train] checkpoint @ epoch 110 -> paper2/runs/ldm_akshara/checkpoint.pt
+22930.4s 344 [train] epoch 111/150  loss 0.0965
+22930.6s 345 [train] epoch 111/150  loss 0.0965
+23129.0s 346 [train] epoch 112/150  loss 0.0962
+23129.2s 347 [train] epoch 112/150  loss 0.0962
+23327.7s 348 [train] epoch 113/150  loss 0.0953
+23327.9s 349 [train] epoch 113/150  loss 0.0953
+23526.9s 350 [train] epoch 114/150  loss 0.0948
+23527.1s 351 [train] epoch 114/150  loss 0.0948
+23725.4s 352 [train] epoch 115/150  loss 0.0954
+23725.6s 353 [train] epoch 115/150  loss 0.0954
+23923.6s 354 [train] epoch 116/150  loss 0.0951
+23923.8s 355 [train] epoch 116/150  loss 0.0951
+24121.9s 356 [train] epoch 117/150  loss 0.0950
+24122.1s 357 [train] epoch 117/150  loss 0.0950
+24320.2s 358 [train] epoch 118/150  loss 0.0952
+24320.4s 359 [train] epoch 118/150  loss 0.0952
+24518.5s 360 [train] epoch 119/150  loss 0.0959
+24518.7s 361 [train] epoch 119/150  loss 0.0959
+24716.9s 362 [train] epoch 120/150  loss 0.0949
+24717.1s 363 [train] epoch 120/150  loss 0.0949
+24719.3s 364 [train] checkpoint @ epoch 120 -> paper2/runs/ldm_akshara/checkpoint.pt
+24719.5s 365 [train] checkpoint @ epoch 120 -> paper2/runs/ldm_akshara/checkpoint.pt
+24917.6s 366 [train] epoch 121/150  loss 0.0948
+24917.9s 367 [train] epoch 121/150  loss 0.0948
+25116.6s 368 [train] epoch 122/150  loss 0.0950
+25116.8s 369 [train] epoch 122/150  loss 0.0950
+25315.2s 370 [train] epoch 123/150  loss 0.0949
+25315.4s 371 [train] epoch 123/150  loss 0.0949
+25513.9s 372 [train] epoch 124/150  loss 0.0948
+25514.2s 373 [train] epoch 124/150  loss 0.0948
+25712.3s 374 [train] epoch 125/150  loss 0.0953
+25712.5s 375 [train] epoch 125/150  loss 0.0953
+25715.3s 376 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0125.png
+25715.5s 377 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0125.png
+25913.9s 378 [train] epoch 126/150  loss 0.0959
+25914.1s 379 [train] epoch 126/150  loss 0.0959
+26112.3s 380 [train] epoch 127/150  loss 0.0954
+26112.5s 381 [train] epoch 127/150  loss 0.0954
+26310.7s 382 [train] epoch 128/150  loss 0.0949
+26310.9s 383 [train] epoch 128/150  loss 0.0949
+26509.1s 384 [train] epoch 129/150  loss 0.0940
+26509.3s 385 [train] epoch 129/150  loss 0.0940
+26708.0s 386 [train] epoch 130/150  loss 0.0947
+26708.2s 387 [train] epoch 130/150  loss 0.0947
+26710.4s 388 [train] checkpoint @ epoch 130 -> paper2/runs/ldm_akshara/checkpoint.pt
+26710.6s 389 [train] checkpoint @ epoch 130 -> paper2/runs/ldm_akshara/checkpoint.pt
+26909.1s 390 [train] epoch 131/150  loss 0.0935
+26909.3s 391 [train] epoch 131/150  loss 0.0935
+27107.9s 392 [train] epoch 132/150  loss 0.0944
+27108.1s 393 [train] epoch 132/150  loss 0.0944
+27306.5s 394 [train] epoch 133/150  loss 0.0943
+27306.8s 395 [train] epoch 133/150  loss 0.0943
+27505.2s 396 [train] epoch 134/150  loss 0.0938
+27505.4s 397 [train] epoch 134/150  loss 0.0938
+27703.9s 398 [train] epoch 135/150  loss 0.0943
+27704.1s 399 [train] epoch 135/150  loss 0.0943
+27902.5s 400 [train] epoch 136/150  loss 0.0933
+27902.7s 401 [train] epoch 136/150  loss 0.0933
+28101.2s 402 [train] epoch 137/150  loss 0.0942
+28101.4s 403 [train] epoch 137/150  loss 0.0942
+28300.3s 404 [train] epoch 138/150  loss 0.0935
+28300.6s 405 [train] epoch 138/150  loss 0.0935
+28498.8s 406 [train] epoch 139/150  loss 0.0946
+28499.0s 407 [train] epoch 139/150  loss 0.0946
+28697.0s 408 [train] epoch 140/150  loss 0.0935
+28697.3s 409 [train] epoch 140/150  loss 0.0935
+28699.5s 410 [train] checkpoint @ epoch 140 -> paper2/runs/ldm_akshara/checkpoint.pt
+28699.8s 411 [train] checkpoint @ epoch 140 -> paper2/runs/ldm_akshara/checkpoint.pt
+28898.0s 412 [train] epoch 141/150  loss 0.0943
+28898.2s 413 [train] epoch 141/150  loss 0.0943
+29096.5s 414 [train] epoch 142/150  loss 0.0942
+29096.7s 415 [train] epoch 142/150  loss 0.0942
+29295.1s 416 [train] epoch 143/150  loss 0.0930
+29295.3s 417 [train] epoch 143/150  loss 0.0930
+29493.6s 418 [train] epoch 144/150  loss 0.0931
+29493.8s 419 [train] epoch 144/150  loss 0.0931
+29692.2s 420 [train] epoch 145/150  loss 0.0940
+29692.4s 421 [train] epoch 145/150  loss 0.0940
+29891.2s 422 [train] epoch 146/150  loss 0.0938
+29891.5s 423 [train] epoch 146/150  loss 0.0938
+30089.9s 424 [train] epoch 147/150  loss 0.0925
+30090.1s 425 [train] epoch 147/150  loss 0.0925
+30288.6s 426 [train] epoch 148/150  loss 0.0941
+30288.8s 427 [train] epoch 148/150  loss 0.0941
+30487.2s 428 [train] epoch 149/150  loss 0.0927
+30487.4s 429 [train] epoch 149/150  loss 0.0927
+30685.8s 430 [train] epoch 150/150  loss 0.0933
+30686.1s 431 [train] epoch 150/150  loss 0.0933
+30691.4s 432 [train] checkpoint @ epoch 150 -> paper2/runs/ldm_akshara/checkpoint.pt
+30691.4s 433 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0150.png
+30691.4s 434 [train] DONE
+30691.6s 435 [train] checkpoint @ epoch 150 -> paper2/runs/ldm_akshara/checkpoint.pt
+30691.6s 436 [train] preview -> paper2/runs/ldm_akshara/preview_epoch0150.png
+30691.6s 437 [train] DONE
+30698.7s 438 === ldm_akshara: OK in 510 min ===
+30698.7s 439 >> python -m paper2.ldm.train_ldm --mode codepoint --parquet-dir data/iiit_hindi_parquet --output-dir paper2/runs/ldm_codepoint --epochs 150 --seed 42 --batch-size 256 --save-every 10 --preview-every 25
+30716.0s 440 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+30716.0s 441 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+30716.2s 442 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+30716.2s 443 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+30716.2s 444 
+30716.2s 445 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+30716.2s 446 Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+30717.0s 447 /kaggle/working/paper2/ldm/train_ldm.py:83: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+30717.0s 448 self.encoder = nn.TransformerEncoder(layer, num_layers=2)
+30717.0s 449 [train] mode=codepoint vocab=103 max_len=16
+30717.0s 450 [latents] Cache tokenizer mismatch — rebuilding token ids only
+30717.0s 451 [train] trainable params: 75.5M — 272 steps/epoch
+30717.2s 452 /kaggle/working/paper2/ldm/train_ldm.py:83: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+30717.2s 453 self.encoder = nn.TransformerEncoder(layer, num_layers=2)
+30717.2s 454 
+30717.2s 455 /kaggle/working/paper2/ldm/train_ldm.py:83: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+30717.2s 456 self.encoder = nn.TransformerEncoder(layer, num_layers=2)
+30717.2s 457 [train] mode=codepoint vocab=103 max_len=16
+30717.2s 458 [latents] Cache tokenizer mismatch — rebuilding token ids only
+30717.2s 459 [train] trainable params: 75.5M — 272 steps/epoch
+30917.9s 460 [train] epoch 1/150  loss 0.2384
+30918.1s 461 [train] epoch 1/150  loss 0.2384
+31117.7s 462 [train] epoch 2/150  loss 0.1610
+31117.9s 463 [train] epoch 2/150  loss 0.1610
+31317.5s 464 [train] epoch 3/150  loss 0.1511
+31317.7s 465 [train] epoch 3/150  loss 0.1511
+31517.4s 466 [train] epoch 4/150  loss 0.1416
+31517.6s 467 [train] epoch 4/150  loss 0.1416
+31717.1s 468 [train] epoch 5/150  loss 0.1371
+31717.3s 469 [train] epoch 5/150  loss 0.1371
+31917.2s 470 [train] epoch 6/150  loss 0.1339
+31917.4s 471 [train] epoch 6/150  loss 0.1339
+32117.0s 472 [train] epoch 7/150  loss 0.1315
+32117.2s 473 [train] epoch 7/150  loss 0.1315
+32316.9s 474 [train] epoch 8/150  loss 0.1278
+32317.1s 475 [train] epoch 8/150  loss 0.1278
+32516.9s 476 [train] epoch 9/150  loss 0.1261
+32517.1s 477 [train] epoch 9/150  loss 0.1261
+32716.8s 478 [train] epoch 10/150  loss 0.1244
+32717.0s 479 [train] epoch 10/150  loss 0.1244
+32718.6s 480 [train] checkpoint @ epoch 10 -> paper2/runs/ldm_codepoint/checkpoint.pt
+32718.8s 481 [train] checkpoint @ epoch 10 -> paper2/runs/ldm_codepoint/checkpoint.pt
+32918.4s 482 [train] epoch 11/150  loss 0.1228
+32918.6s 483 [train] epoch 11/150  loss 0.1228
+33118.7s 484 [train] epoch 12/150  loss 0.1215
+33118.9s 485 [train] epoch 12/150  loss 0.1215
+33319.6s 486 [train] epoch 13/150  loss 0.1208
+33319.8s 487 [train] epoch 13/150  loss 0.1208
+33520.1s 488 [train] epoch 14/150  loss 0.1191
+33520.3s 489 [train] epoch 14/150  loss 0.1191
+33720.5s 490 [train] epoch 15/150  loss 0.1179
+33720.7s 491 [train] epoch 15/150  loss 0.1179
+33920.9s 492 [train] epoch 16/150  loss 0.1166
+33921.2s 493 [train] epoch 16/150  loss 0.1166
+34121.4s 494 [train] epoch 17/150  loss 0.1154
+34121.6s 495 [train] epoch 17/150  loss 0.1154
+34321.7s 496 [train] epoch 18/150  loss 0.1161
+34322.0s 497 [train] epoch 18/150  loss 0.1161
+34522.0s 498 [train] epoch 19/150  loss 0.1150
+34522.2s 499 [train] epoch 19/150  loss 0.1150
+34722.0s 500 [train] epoch 20/150  loss 0.1137
+34722.2s 501 [train] epoch 20/150  loss 0.1137
+34724.0s 502 [train] checkpoint @ epoch 20 -> paper2/runs/ldm_codepoint/checkpoint.pt
+34724.2s 503 [train] checkpoint @ epoch 20 -> paper2/runs/ldm_codepoint/checkpoint.pt
+34924.4s 504 [train] epoch 21/150  loss 0.1121
+34924.6s 505 [train] epoch 21/150  loss 0.1121
+35124.1s 506 [train] epoch 22/150  loss 0.1120
+35124.3s 507 [train] epoch 22/150  loss 0.1120
+35324.1s 508 [train] epoch 23/150  loss 0.1126
+35324.3s 509 [train] epoch 23/150  loss 0.1126
+35524.2s 510 [train] epoch 24/150  loss 0.1114
+35524.4s 511 [train] epoch 24/150  loss 0.1114
+35724.4s 512 [train] epoch 25/150  loss 0.1101
+35724.6s 513 [train] epoch 25/150  loss 0.1101
+35727.5s 514 [train] preview -> paper2/runs/ldm_codepoint/preview_epoch0025.png
+35727.7s 515 [train] preview -> paper2/runs/ldm_codepoint/preview_epoch0025.png
+35927.8s 516 [train] epoch 26/150  loss 0.1094
+35928.0s 517 [train] epoch 26/150  loss 0.1094
+36128.1s 518 [train] epoch 27/150  loss 0.1086
+36128.3s 519 [train] epoch 27/150  loss 0.1086
+36328.2s 520 [train] epoch 28/150  loss 0.1089
+36328.4s 521 [train] epoch 28/150  loss 0.1089
+36528.7s 522 [train] epoch 29/150  loss 0.1079
+36528.9s 523 [train] epoch 29/150  loss 0.1079
+36729.0s 524 [train] epoch 30/150  loss 0.1076
+36729.2s 525 [train] epoch 30/150  loss 0.1076
+36731.2s 526 [train] checkpoint @ epoch 30 -> paper2/runs/ldm_codepoint/checkpoint.pt
+36731.4s 527 [train] checkpoint @ epoch 30 -> paper2/runs/ldm_codepoint/checkpoint.pt
+36931.2s 528 [train] epoch 31/150  loss 0.1075
+36931.5s 529 [train] epoch 31/150  loss 0.1075
+37131.4s 530 [train] epoch 32/150  loss 0.1071
+37131.6s 531 [train] epoch 32/150  loss 0.1071
+37331.6s 532 [train] epoch 33/150  loss 0.1069
+37331.8s 533 [train] epoch 33/150  loss 0.1069
+37531.7s 534 [train] epoch 34/150  loss 0.1068
+37531.9s 535 [train] epoch 34/150  loss 0.1068
+37731.8s 536 [train] epoch 35/150  loss 0.1065
+37732.0s 537 [train] epoch 35/150  loss 0.1065
+37931.7s 538 [train] epoch 36/150  loss 0.1063
+37931.9s 539 [train] epoch 36/150  loss 0.1063
+38132.2s 540 [train] epoch 37/150  loss 0.1052
+38132.5s 541 [train] epoch 37/150  loss 0.1052
+38332.8s 542 [train] epoch 38/150  loss 0.1062
+38333.1s 543 [train] epoch 38/150  loss 0.1062
+38533.4s 544 [train] epoch 39/150  loss 0.1043
+38533.6s 545 [train] epoch 39/150  loss 0.1043
+38733.8s 546 [train] epoch 40/150  loss 0.1037
+38734.0s 547 [train] epoch 40/150  loss 0.1037
+38736.1s 548 [train] checkpoint @ epoch 40 -> paper2/runs/ldm_codepoint/checkpoint.pt
+38736.3s 549 [train] checkpoint @ epoch 40 -> paper2/runs/ldm_codepoint/checkpoint.pt
+38936.5s 550 [train] epoch 41/150  loss 0.1040
+38936.7s 551 [train] epoch 41/150  loss 0.1040
+39136.4s 552 [train] epoch 42/150  loss 0.1048
+39136.6s 553 [train] epoch 42/150  loss 0.1048
+39336.5s 554 [train] epoch 43/150  loss 0.1041
+39336.8s 555 [train] epoch 43/150  loss 0.1041
+39536.6s 556 [train] epoch 44/150  loss 0.1044
+39536.8s 557 [train] epoch 44/150  loss 0.1044
+39737.0s 558 [train] epoch 45/150  loss 0.1035
+39737.2s 559 [train] epoch 45/150  loss 0.1035
+39937.0s 560 [train] epoch 46/150  loss 0.1030
+39937.3s 561 [train] epoch 46/150  loss 0.1030
+40137.1s 562 [train] epoch 47/150  loss 0.1024
+40137.3s 563 [train] epoch 47/150  loss 0.1024
+40337.5s 564 [train] epoch 48/150  loss 0.1037
+40337.7s 565 [train] epoch 48/150  loss 0.1037
+40537.5s 566 [train] epoch 49/150  loss 0.1046
+40537.7s 567 [train] epoch 49/150  loss 0.1046
+40737.6s 568 [train] epoch 50/150  loss 0.1033
+40737.8s 569 [train] epoch 50/150  loss 0.1033
+40742.8s 570 [train] checkpoint @ epoch 50 -> paper2/runs/ldm_codepoint/checkpoint.pt
+40742.8s 571 [train] preview -> paper2/runs/ldm_codepoint/preview_epoch0050.png
+40743.0s 572 [train] checkpoint @ epoch 50 -> paper2/runs/ldm_codepoint/checkpoint.pt
+40743.0s 573 [train] preview -> paper2/runs/ldm_codepoint/preview_epoch0050.png
+40942.8s 574 [train] epoch 51/150  loss 0.1027
+40943.0s 575 [train] epoch 51/150  loss 0.1027
+41143.2s 576 [train] epoch 52/150  loss 0.1017
+41143.4s 577 [train] epoch 52/150  loss 0.1017
+41343.7s 578 [train] epoch 53/150  loss 0.1025
+41344.0s 579 [train] epoch 53/150  loss 0.1025
+41544.0s 580 [train] epoch 54/150  loss 0.1014
+41544.3s 581 [train] epoch 54/150  loss 0.1014
+41744.3s 582 [train] epoch 55/150  loss 0.1020
+41744.5s 583 [train] epoch 55/150  loss 0.1020
+41944.4s 584 [train] epoch 56/150  loss 0.1008
+41944.7s 585 [train] epoch 56/150  loss 0.1008
+42144.6s 586 [train] epoch 57/150  loss 0.1011
+42144.9s 587 [train] epoch 57/150  loss 0.1011
+42344.9s 588 [train] epoch 58/150  loss 0.1012
+42345.1s 589 [train] epoch 58/150  loss 0.1012
+42545.3s 590 [train] epoch 59/150  loss 0.1019
+42545.5s 591 [train] epoch 59/150  loss 0.1019
+42745.6s 592 [train] epoch 60/150  loss 0.1021
+42745.8s 593 [train] epoch 60/150  loss 0.1021
+42747.8s 594 [train] checkpoint @ epoch 60 -> paper2/runs/ldm_codepoint/checkpoint.pt
+42748.0s 595 [train] checkpoint @ epoch 60 -> paper2/runs/ldm_codepoint/checkpoint.pt
+42948.4s 596 [train] epoch 61/150  loss 0.1001
+42948.6s 597 [train] epoch 61/150  loss 0.1001
+43148.6s 598 [train] epoch 62/150  loss 0.1009
+43148.8s 599 [train] epoch 62/150  loss 0.1009

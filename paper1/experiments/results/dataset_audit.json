@@ -1,0 +1,20 @@
+{
+  "dataset": "c3rl/IIIT-INDIC-HW-WORDS-Hindi",
+  "splits": [
+    {
+      "split": "train",
+      "num_samples": 69853,
+      "num_bytes": 1399209263.408
+    },
+    {
+      "split": "validation",
+      "num_samples": 12708,
+      "num_bytes": 260683454.608
+    },
+    {
+      "split": "test",
+      "num_samples": 12869,
+      "num_bytes": 252781030.535
+    }
+  ]
+}

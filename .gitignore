@@ -94,3 +94,7 @@ temp/
 
 # Docker/local overrides
 docker-compose.override.yml
+
+# Paper 1 experiment artifacts (results JSONs stay tracked)
+ablation_runs/
+data_synth/

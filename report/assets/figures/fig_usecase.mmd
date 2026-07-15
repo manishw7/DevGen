@@ -1,0 +1,22 @@
+flowchart LR
+  User(["End User"])
+  subgraph DevGen System
+    U1(["Upload Image"])
+    U2(["Preprocess Image"])
+    U3(["Run Smart OCR"])
+    U4(["Classify Character"])
+    U5(["Recognize Word"])
+    U6(["Extract Entities (NER)"])
+    U7(["Evaluate CER"])
+    U8(["Generate Synthetic Word"])
+    U9(["Browse Dataset"])
+  end
+  User --- U1
+  User --- U2
+  User --- U3
+  User --- U7
+  User --- U8
+  User --- U9
+  U3 -.includes.-> U4
+  U3 -.includes.-> U5
+  U5 -.extends.-> U6

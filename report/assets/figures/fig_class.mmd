@@ -1,0 +1,35 @@
+classDiagram
+  class ImageRouter {
+    +classify_input_type(Image) dict
+    -_count_blobs(ndarray, min_size) int
+    -_flood_fill(...) int
+  }
+  class CharacterClassifier {
+    +DevanagariCNN model
+    +predict(Image) dict
+    -_preprocess_dhcd_style(Image) Tensor
+  }
+  class TrOCREngine {
+    +VisionEncoderDecoderModel model
+    +TrOCRProcessor processor
+    +recognize(Image, force_model) dict
+    -_preprocess_image(Image) Image
+  }
+  class NERExtractor {
+    +extract_entities(str) dict
+    +summarize_entities(dict) str
+  }
+  class Preprocessor {
+    +full_preprocess(bytes) Image
+    +preprocess_for_ocr(bytes) Image
+  }
+  class GANGenerator {
+    +forward(spatial_feats, style) Tensor
+  }
+  class LDMEngine {
+    +generate_handwriting_ldm(text) Image
+  }
+  ImageRouter --> CharacterClassifier : routes char
+  ImageRouter --> TrOCREngine : routes word
+  TrOCREngine --> NERExtractor : feeds text
+  Preprocessor --> ImageRouter : cleaned image

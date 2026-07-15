@@ -1,0 +1,20 @@
+sequenceDiagram
+  actor U as User
+  participant FE as React Frontend
+  participant API as FastAPI (main.py)
+  participant PP as Preprocessor
+  participant R as ImageRouter
+  participant T as TrOCREngine
+  participant N as NERExtractor
+  U->>FE: Upload word image
+  FE->>API: POST /api/v1/recognize/full
+  API->>PP: preprocess_for_ocr(bytes)
+  PP-->>API: cropped word image
+  API->>T: recognize(image, force_model)
+  T->>R: classify_input_type(image)
+  R-->>T: {type, confidence}
+  T-->>API: {text, token_confidences}
+  API->>N: extract_entities(text)
+  N-->>API: {entities, summary}
+  API-->>FE: JSON result
+  FE-->>U: Text + confidence + entities

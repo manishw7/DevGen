@@ -131,29 +131,36 @@ def crop_to_foreground(img: np.ndarray, padding_ratio: float = 0.18) -> np.ndarr
     return img[y1:y2, x1:x2]
 
 
-def preprocess_for_ocr(image_bytes: bytes) -> Image.Image:
-    """Prepare a word image for TrOCR.
+def preprocess_cv2_for_ocr(img: np.ndarray) -> np.ndarray:
+    """Word-image preprocessing on a BGR array.
     Matches HF Space Logic:
     - AR <= 1.55: Crop to foreground.
     - AR > 2.2: Crop to foreground + Pad to Square.
     - 1.55 < AR <= 2.2: No change (raw).
     """
-    img = bytes_to_cv2(image_bytes)
-    if img is None: return None
-    
     h, w = img.shape[:2]
     aspect_ratio = w / float(h)
-    
+
     if aspect_ratio <= 1.55:
         img = crop_to_foreground(img)
     elif aspect_ratio > 2.2:
         img = crop_to_foreground(img)
         img = normalize_for_model(img, target_height=384, target_width=384)
-    else:
-        # Standard word - return raw as HF space does
-        pass
-        
-    return cv2_to_pil(img)
+    return img
+
+
+def preprocess_for_ocr(image_bytes: bytes) -> Image.Image:
+    """Prepare a word image for TrOCR from raw bytes (serving path)."""
+    img = bytes_to_cv2(image_bytes)
+    if img is None: return None
+    return cv2_to_pil(preprocess_cv2_for_ocr(img))
+
+
+def preprocess_pil_for_ocr(image: Image.Image) -> Image.Image:
+    """Prepare a PIL word image for TrOCR without a bytes round-trip
+    (training/eval path — must stay in parity with preprocess_for_ocr)."""
+    img = cv2.cvtColor(np.array(image.convert("RGB")), cv2.COLOR_RGB2BGR)
+    return cv2_to_pil(preprocess_cv2_for_ocr(img))
 
 
 def full_preprocess(image_bytes: bytes) -> Image.Image:

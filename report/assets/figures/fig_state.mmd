@@ -1,0 +1,12 @@
+stateDiagram-v2
+  [*] --> Idle
+  Idle --> Uploaded : image received
+  Uploaded --> Preprocessed : preprocess_for_ocr
+  Preprocessed --> Routed : classify_input_type
+  Routed --> CharRecognized : type=character
+  Routed --> WordRecognized : type=word
+  WordRecognized --> EntitiesExtracted : NER
+  CharRecognized --> Responded
+  EntitiesExtracted --> Responded
+  Responded --> Idle
+  Responded --> [*]

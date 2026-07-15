@@ -1,0 +1,15 @@
+flowchart TD
+  A["Input Image"] --> B["Grayscale + Adaptive Binarize"]
+  B --> C["Compute Ink Ratio"]
+  C -->|"ink < 0.5%"| CH["Route: CHARACTER (default)"]
+  C -->|"ink OK"| D["Bounding Box + Aspect Ratio"]
+  D --> E["Flood-Fill Blob Count"]
+  E --> F{"Aspect > 2.5 ?"}
+  F -->|Yes| W["Route: WORD -> TrOCR"]
+  F -->|No| G{"Aspect > 1.8 AND blobs >= 3 ?"}
+  G -->|Yes| W
+  G -->|No| H{"Aspect < 1.3 AND blobs <= 2 ?"}
+  H -->|Yes| CH2["Route: CHARACTER -> CNN"]
+  H -->|No| I["Ambiguous: score by aspect / blobs"]
+  I --> W
+  I --> CH2

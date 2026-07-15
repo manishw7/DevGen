@@ -1,0 +1,11 @@
+flowchart LR
+  TEXT["Devanagari text"] --> RND["Render glyphs on canvas (font.ttf)"]
+  RND --> CTRL["Control image (edges)"]
+  TEXT --> TRANS["Phonetic transliteration"]
+  TRANS --> CLIP["CLIP Text Encoder"]
+  CTRL --> CNET["ControlNet (zero-conv)"]
+  CLIP --> UNET["SD v1-5 U-Net (latent)"]
+  CNET --> UNET
+  NOISE["Latent noise"] --> UNET
+  UNET --> DEC["VAE Decoder"]
+  DEC --> OUT["Generated word image"]

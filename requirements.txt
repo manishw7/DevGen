@@ -26,8 +26,13 @@ torchvision
 transformers
 accelerate
 peft
+sentencepiece
 
 # ── Benchmarking (optional) ─────────────────────────
 # Requires Tesseract binary installed separately:
 # https://github.com/UB-Mannheim/tesseract/wiki
 pytesseract
+
+# ── Paper 1 synthetic augmentation (optional) ───────
+diffusers
+safetensors

@@ -1,0 +1,18 @@
+flowchart TB
+  subgraph G["Generator"]
+    Z["z ~ N(0,I) 128-d"] --> MAP["Style Mapping MLP (6 layers)"]
+    TXT["Text tokens"] --> ENC["Bi-GRU Spatial Text Encoder"]
+    ENC --> SF["spatial_feats 512xL"]
+    SF --> EXP["Expand Height (ConvT)"]
+    EXP --> ATT["Bottleneck Self-Attention"]
+    ATT --> U["4x StyleModulatedConv Upsample<br/>+ Noise Injection + toRGB skips"]
+    MAP -->|style w| U
+    U --> REF["Refine Block"]
+    REF --> IMG["256x64 Grayscale Word"]
+  end
+  subgraph D["Discriminator"]
+    IMG --> PATCH["SN Spectral Patch Discriminator"]
+    TXT2["Text embed"] --> PATCH
+    PATCH --> REAL["Real / Fake (Hinge)"]
+  end
+  IMG --> CTC["TextRecognizer CTC Loss"]

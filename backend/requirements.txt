@@ -4,6 +4,8 @@ python-multipart
 torch
 torchvision
 transformers
+diffusers
+safetensors
 Pillow
 numpy
 opencv-python-headless
@@ -11,4 +13,5 @@ pandas
 pyarrow
 datasets
 peft
+sentencepiece
 editdistance

@@ -1,0 +1,15 @@
+flowchart TD
+  S(("Start")) --> A["Receive uploaded image"]
+  A --> B["Foreground crop / preprocess"]
+  B --> C{"force_model set?"}
+  C -->|Yes| E["Use forced model"]
+  C -->|No| D["ImageRouter classify"]
+  D --> F{"type = word?"}
+  F -->|Yes| T["TrOCR decode (beam search)"]
+  F -->|No| G["CNN classify character"]
+  E --> T
+  T --> H["Token confidence + NER"]
+  G --> I["Class label + probability"]
+  H --> J["Return JSON"]
+  I --> J
+  J --> Z(("End"))

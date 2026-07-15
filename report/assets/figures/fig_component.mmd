@@ -1,0 +1,29 @@
+flowchart TB
+  subgraph Client
+    FE["React + Vite SPA<br/>(Recognize, NER, Evaluate,<br/>Dataset, Generative Suite)"]
+  end
+  subgraph Server["FastAPI Backend"]
+    API["REST API (main.py)"]
+    PP["preprocessing.py"]
+    RT["image_router.py"]
+    CN["cnn_model.py"]
+    TR["trocr_engine.py"]
+    NE["ner_extractor.py"]
+    GAN["StyleGAN loader"]
+    LDM["ldm_engine.py"]
+    DS["dataset_loader.py"]
+  end
+  subgraph Artifacts["Model Artifacts"]
+    W1["TrOCR LoRA adapter"]
+    W2["CNN weights"]
+    W3["GAN checkpoint .pt"]
+    W4["ControlNet checkpoint"]
+  end
+  FE -->|HTTP JSON| API
+  API --> PP --> RT
+  RT --> CN --> W2
+  RT --> TR --> W1
+  TR --> NE
+  API --> GAN --> W3
+  API --> LDM --> W4
+  API --> DS

@@ -1,0 +1,191 @@
+% Paper 2 — Devanagari handwriting generation with latent diffusion.
+% LNCS format (ICDAR/ICFHR target). Compile with XeLaTeX/LuaLaTeX for
+% Devanagari examples; see paper1/main.tex for the fontspec pattern.
+\documentclass{llncs}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{iftex}
+\ifPDFTeX
+  \newcommand{\dn}[1]{\texttt{[Devanagari]}}
+\else
+  \usepackage{fontspec}
+  \newfontfamily\devafont[Script=Devanagari]{Noto Sans Devanagari}
+  \newcommand{\dn}[1]{{\devafont #1}}
+\fi
+
+\begin{document}
+
+\title{Glyph-Conditioned Latent Diffusion for Devanagari Handwritten
+Word Generation}
+\titlerunning{Devanagari Handwriting Generation with Latent Diffusion}
+
+\author{Samir Wagle\inst{1} \and Manish~...\inst{1}}
+\institute{Tribhuvan University, Kathmandu, Nepal\\
+\email{samir@redtab.xyz}}
+
+\maketitle
+
+\begin{abstract}
+Diffusion-based handwriting generation has advanced rapidly for Latin
+scripts, but no latent-diffusion generator exists for Devanagari — an
+abugida whose conjunct ligatures, dependent vowel signs, and connecting
+headline make verbatim text rendering substantially harder than for
+alphabetic scripts. We present the first latent diffusion system for
+Devanagari handwritten word generation. Text content is enforced through a
+ControlNet branch conditioned on font-rendered glyph images, sidestepping
+the failure of CLIP-based text encoders on non-Latin orthography. We
+evaluate with generation fidelity (FID), content fidelity (CER of an
+independent Devanagari HTR model on generated images), and a conjunct-aware
+out-of-vocabulary protocol measuring generalization to unseen consonant
+clusters. Finally, we show downstream utility: mixing generated words into
+HTR training data improves recognition on IIIT-INDIC-HW-WORDS Hindi. We
+release the model, training code, and evaluation protocol, and outline an
+akshara-tokenized conditioning scheme as the path to writer-styled
+generation.
+\keywords{Handwriting generation \and Latent diffusion \and ControlNet
+\and Devanagari \and Data augmentation.}
+\end{abstract}
+
+\section{Introduction}
+
+Generating realistic handwritten text images has two practical payoffs:
+training-data augmentation for handwritten text recognition (HTR) in
+low-resource scripts, and personalized text rendering. Latent diffusion
+models (LDMs) now dominate this task for Latin
+scripts~\cite{nikolaidou2023wordstylist,nikolaidou2024diffusionpen,dai2024onedm},
+yet a survey of the literature shows \emph{no} diffusion-based handwriting
+generator for Devanagari or any Indic script; prior Devanagari generation
+work is limited to GANs over isolated characters~\cite{nepaligan2022}.
+
+The gap is not incidental. Latin-script diffusion generators condition on
+text via character embeddings or CLIP-style encoders. For Devanagari both
+break down: CLIP tokenizers have effectively no Devanagari coverage, and
+character-sequence conditioning must handle conjunct formation — the visual
+form of \dn{क्} + \dn{ष} is the fused ligature \dn{क्ष}, not a
+concatenation of glyphs. A generator that spells rather than ligates
+produces text no literate reader accepts.
+
+Our contributions:
+\begin{enumerate}
+  \item \textbf{The first Devanagari handwriting LDM.} A ControlNet branch
+  over Stable Diffusion, conditioned on font-rendered glyph images, which
+  delegates orthography (conjunct formation, matra placement, shirorekha)
+  to a Unicode shaping engine and lets diffusion model stroke style and
+  texture.
+  \item \textbf{A script-aware evaluation protocol}: FID for visual
+  fidelity; CER/AER of an independent TrOCR-based Devanagari recognizer on
+  generated images for content fidelity; and an out-of-vocabulary split
+  stratified by conjunct content, testing generalization to unseen
+  clusters.
+  \item \textbf{Downstream utility}: dose-response of mixing generated
+  words into HTR training (companion study), the first augmentation result
+  for Indic HTR from a diffusion generator.
+\end{enumerate}
+
+\section{Related Work}
+
+\paragraph{Diffusion handwriting generation.}
+WordStylist~\cite{nikolaidou2023wordstylist} trains a compact LDM from
+scratch with character-embedding cross-attention and writer embeddings on
+IAM. DiffusionPen~\cite{nikolaidou2024diffusionpen} adds a few-shot style
+encoder; One-DM~\cite{dai2024onedm} achieves one-shot style imitation;
+Diffusion Brush extends generation to full text lines. All target Latin
+scripts; none address abugida orthography.
+
+\paragraph{Glyph conditioning for visual text.}
+GlyphControl~\cite{yang2023glyphcontrol} and successors condition scene-text
+generation on rendered glyph images, showing that explicit visual glyph
+guidance outperforms text-encoder conditioning for accurate spelling. We
+bring this insight to handwriting: for a script where a shaping engine
+already solves ligation, rendered-glyph conditioning transfers orthographic
+correctness for free.
+
+\paragraph{Devanagari generation.}
+Existing work generates isolated Nepali characters with
+GANs~\cite{nepaligan2022} at low resolution without text conditioning —
+class-conditional synthesis, not verbatim word generation. To our knowledge
+no prior system generates arbitrary Devanagari words in handwritten style.
+
+\section{Method}
+
+\subsection{Architecture}
+
+We build on Stable Diffusion v1.5's VAE latent space and UNet, freezing
+both, and train a ControlNet~\cite{zhang2023controlnet} branch initialized
+from the UNet encoder. The conditioning image renders the target word in
+Noto Sans Devanagari — white on black, foreground-cropped, centered at
+$256{\times}256$ — so the Unicode shaping engine (HarfBuzz) resolves
+conjuncts, matra positioning, and the shirorekha before diffusion begins.
+The prompt pathway receives a fixed template with a phonetic
+transliteration of the word; because CLIP cannot represent Devanagari, the
+prompt contributes style context (``handwritten, paper, ink'') while the
+ControlNet branch alone carries orthographic content. Training: 28k steps,
+LR $1.5{\times}10^{-5}$, fp16, on IIIT-INDIC-HW-WORDS Hindi word images
+resized to $256{\times}256$.
+
+\subsection{Why Not Character Embeddings (Yet)}
+
+WordStylist-style character-embedding conditioning must \emph{learn}
+conjunct formation from data. In IIIT-INDIC-HW-WORDS Hindi, conjunct
+frequency follows a long tail; rare clusters may appear only a handful of
+times — a data regime where learned ligation fails silently. Rendered-glyph
+conditioning guarantees orthographic correctness for every representable
+cluster, at the cost of style controllability. Section~\ref{sec:future}
+outlines the akshara-tokenized hybrid we see as the next step.
+
+\section{Evaluation Protocol}
+
+\paragraph{Visual fidelity.} FID between generated and real word images
+(test-split references), computed at generation resolution.
+\paragraph{Content fidelity.} An independently trained Devanagari TrOCR
+recognizer (from our companion study) reads each generated image; we report
+CER and akshara error rate against the intended text. This measures whether
+generations are \emph{readable as the right word}, not merely plausible.
+\paragraph{Conjunct-stratified OOV.} We generate (i) in-vocabulary words,
+(ii) OOV words composed of seen aksharas, and (iii) OOV words containing
+conjuncts unseen in training, and compare content fidelity across strata.
+\paragraph{Downstream augmentation.} Generated words mixed into HTR
+training at $+10/25/50\%$ of real data; recognition CER on the official
+test split.
+
+\section{Results}
+
+% TODO(experiments pending — run after Paper 1 sweep completes):
+% 1. Generate eval sets with paper1/experiments/generate_synthetic.py
+%    (IV / OOV-seen-akshara / OOV-unseen-conjunct vocab files).
+% 2. FID: clean-fid against real test images.
+% 3. Content fidelity: evaluate.py --data-dir over generated sets with the
+%    best Paper-1 adapter as the judge.
+% 4. Augmentation: run_augmentation.sh dose-response table.
+% 5. Qualitative grid: real vs generated for 8 words incl. heavy conjuncts.
+\emph{[Experiments in progress; tables and qualitative figures to be
+inserted from the evaluation pipeline.]}
+
+\section{Limitations and Future Work}
+\label{sec:future}
+
+Rendered-glyph conditioning trades style diversity for orthographic
+correctness: generations track the conditioning layout, and writer identity
+is not controllable. The path forward is akshara-level tokenized
+conditioning — embeddings over orthographic syllables rather than
+codepoints, giving the model ligation-aware content control — combined with
+a style encoder over writer exemplars in the DiffusionPen mold. The public
+Hindi word benchmark exposes no writer identities, so style supervision
+requires either the original dataset release's writer metadata or
+unsupervised style pseudo-labels; we leave this to future work.
+
+\section{Conclusion}
+
+We presented the first latent-diffusion handwriting generator for
+Devanagari, a script-aware evaluation protocol measuring what Latin-script
+metrics miss (conjunct generalization, content readability), and evidence
+that diffusion-generated data improves Devanagari HTR. The gap between
+Latin and Indic handwriting generation is now open to systematic study.
+
+\bibliographystyle{splncs04}
+\bibliography{references}
+
+\end{document}

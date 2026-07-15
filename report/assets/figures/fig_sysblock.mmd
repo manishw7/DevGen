@@ -1,0 +1,13 @@
+flowchart LR
+  IN["Handwritten Image"] --> PRE["Preprocessing<br/>(deskew, denoise, threshold)"]
+  PRE --> ROUTE["Smart ImageRouter"]
+  ROUTE -->|character| CNN["DevanagariCNN<br/>(46 classes)"]
+  ROUTE -->|word| TROCR["TrOCR + LoRA<br/>(ViT enc / Transformer dec)"]
+  TROCR --> NER["NER Extractor"]
+  CNN --> OUT["Result: label / text +<br/>confidence + entities"]
+  NER --> OUT
+  subgraph GEN["Generative Augmentation"]
+    G1["StyleGAN-Attention"]
+    G2["LDM + ControlNet"]
+  end
+  GEN -.synth training data.-> TROCR
